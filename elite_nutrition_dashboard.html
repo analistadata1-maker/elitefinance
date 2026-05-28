@@ -287,22 +287,33 @@ function render(d) {
   const GC='rgba(255,255,255,0.04)',TC='#4a5a7a';
   const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
 
-  charts.push(new Chart(document.getElementById('ch1'),{type:'bar',
-    data:{labels:canales.map(c=>c.l),datasets:[{data:canales.map(c=>+(c.v/1e6).toFixed(2)),backgroundColor:canales.map(c=>c.c),borderRadius:4,borderSkipped:false}]},
-    options:{...base,indexAxis:'y',scales:{x:{ticks:{color:TC,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:GC},border:{display:false}},y:{ticks:{color:'#8a9bbf',font:{size:11}},grid:{display:false},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.x.toFixed(2)+'M'}}}}}));
+  // Charts con manejo robusto de datos vacíos
+  try {
+    const canalesData = canales.length > 0 ? canales : [{l:'Sin datos',v:0,c:'#4a5a7a'}];
+    charts.push(new Chart(document.getElementById('ch1'),{type:'bar',
+      data:{labels:canalesData.map(c=>c.l),datasets:[{data:canalesData.map(c=>+(c.v/1e6).toFixed(2)),backgroundColor:canalesData.map(c=>c.c),borderRadius:4,borderSkipped:false}]},
+      options:{...base,indexAxis:'y',scales:{x:{ticks:{color:TC,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:GC},border:{display:false}},y:{ticks:{color:'#8a9bbf',font:{size:11}},grid:{display:false},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.x.toFixed(2)+'M'}}}}}));
+  } catch(e){ console.warn('ch1 error:',e); }
 
-  charts.push(new Chart(document.getElementById('ch2'),{type:'doughnut',
-    data:{labels:['Cartera','Caja','Bancos','Inventario'],datasets:[{data:[cartera,dispCaja,dispBancos,inventario].map(v=>+(v/1e6).toFixed(2)),backgroundColor:['#8b5cf6','#00c896','#3b82f6','#f59e0b'],borderWidth:2,borderColor:'#111827'}]},
-    options:{...base,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8a9bbf',font:{size:10},boxWidth:10,padding:10}},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.toFixed(1)+'M'}}}}}));
+  try {
+    charts.push(new Chart(document.getElementById('ch2'),{type:'doughnut',
+      data:{labels:['Cartera','Caja','Bancos','Inventario'],datasets:[{data:[cartera,dispCaja,dispBancos,inventario].map(v=>+(v/1e6).toFixed(2)),backgroundColor:['#8b5cf6','#00c896','#3b82f6','#f59e0b'],borderWidth:2,borderColor:'#111827'}]},
+      options:{...base,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8a9bbf',font:{size:10},boxWidth:10,padding:10}},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.toFixed(1)+'M'}}}}}));
+  } catch(e){ console.warn('ch2 error:',e); }
 
-  charts.push(new Chart(document.getElementById('ch3'),{type:'bar',
-    data:{labels:['Activo cte.','Pasivo cte.','CTN'],datasets:[{data:[+(activoCte/1e6).toFixed(2),+(pasivoCte/1e6).toFixed(2),+(ctn/1e6).toFixed(2)],backgroundColor:['#3b82f6','#ff4d6d',ctn>=0?'#00c896':'#ff4d6d'],borderRadius:6,borderSkipped:false}]},
-    options:{...base,scales:{x:{ticks:{color:TC,font:{size:11}},grid:{display:false},border:{display:false}},y:{ticks:{color:TC,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:GC},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return (v<0?'-':'')+'$'+Math.abs(v).toFixed(1)+'M'}}}}}));
+  try {
+    charts.push(new Chart(document.getElementById('ch3'),{type:'bar',
+      data:{labels:['Activo cte.','Pasivo cte.','CTN'],datasets:[{data:[+(activoCte/1e6).toFixed(2),+(pasivoCte/1e6).toFixed(2),+(ctn/1e6).toFixed(2)],backgroundColor:['#3b82f6','#ff4d6d',ctn>=0?'#00c896':'#ff4d6d'],borderRadius:6,borderSkipped:false}]},
+      options:{...base,scales:{x:{ticks:{color:TC,font:{size:11}},grid:{display:false},border:{display:false}},y:{ticks:{color:TC,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:GC},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return (v<0?'-':'')+'$'+Math.abs(v).toFixed(1)+'M'}}}}}));
+  } catch(e){ console.warn('ch3 error:',e); }
 
-  const gd=[{l:'Administrativos',v:gtoAdmin,c:'#3b82f6'},{l:'Marketing',v:gtoMkt,c:'#f59e0b'},{l:'Logística',v:gtoLogistica,c:'#14b8a6'},{l:'Financieros',v:gtoFin,c:'#ff4d6d'},{l:'Comercialización',v:gtoComercial,c:'#8b5cf6'},{l:'Impuestos',v:gtoImp,c:'#f97316'}].filter(x=>x.v>0);
-  charts.push(new Chart(document.getElementById('ch4'),{type:'doughnut',
-    data:{labels:gd.map(x=>x.l),datasets:[{data:gd.map(x=>+(x.v/1e6).toFixed(2)),backgroundColor:gd.map(x=>x.c),borderWidth:2,borderColor:'#111827'}]},
-    options:{...base,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8a9bbf',font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.toFixed(1)+'M'}}}}}));
+  try {
+    const gd=[{l:'Administrativos',v:gtoAdmin,c:'#3b82f6'},{l:'Marketing',v:gtoMkt,c:'#f59e0b'},{l:'Logística',v:gtoLogistica,c:'#14b8a6'},{l:'Financieros',v:gtoFin,c:'#ff4d6d'},{l:'Comercialización',v:gtoComercial,c:'#8b5cf6'},{l:'Impuestos',v:gtoImp,c:'#f97316'}].filter(x=>x.v>0);
+    const gdFinal = gd.length > 0 ? gd : [{l:'Sin datos',v:1,c:'#4a5a7a'}];
+    charts.push(new Chart(document.getElementById('ch4'),{type:'doughnut',
+      data:{labels:gdFinal.map(x=>x.l),datasets:[{data:gdFinal.map(x=>+(x.v/1e6).toFixed(2)),backgroundColor:gdFinal.map(x=>x.c),borderWidth:2,borderColor:'#111827'}]},
+      options:{...base,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8a9bbf',font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.toFixed(1)+'M'}}}}}));
+  } catch(e){ console.warn('ch4 error:',e); }
 }
 
 function startCountdown(){
