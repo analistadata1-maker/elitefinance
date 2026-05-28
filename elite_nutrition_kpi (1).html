@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPI Financieros — Elite Nutrition</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#e8edf5;--text2:#8a9bbf;--text3:#4a5a7a;--green:#00c896;--red:#ff4d6d;--amber:#f59e0b;--blue:#3b82f6;--r:12px;--rs:8px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;padding:0}
+  .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:34px;height:34px;background:linear-gradient(135deg,#00c896,#0077b6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:#fff}
+  .btext h1{font-size:14px;font-weight:600}
+  .btext p{font-size:10px;color:var(--text2)}
+  .hright{display:flex;align-items:center;gap:12px}
+  .sdot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);display:inline-block;animation:pulse 2s infinite}
+  .sdot.loading{background:var(--amber);box-shadow:0 0 5px var(--amber)}
+  .sdot.error{background:var(--red);animation:none}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .rinfo{font-size:10px;color:var(--text3)}.rinfo span{color:var(--green);font-weight:500}
+  .rbtn{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:5px 12px;border-radius:var(--rs);cursor:pointer;font-size:11px;font-family:inherit}
+  .cbar{height:2px;background:var(--border);position:fixed;top:56px;left:0;right:0;z-index:99}
+  .cfill{height:100%;background:var(--green);box-shadow:0 0 5px var(--green);transition:width .5s linear}
+  .container{padding:16px 24px;max-width:1600px;margin:0 auto}
+  .sec{font-size:10px;font-weight:600;letter-spacing:1.1px;color:var(--text3);text-transform:uppercase;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+  .sec::after{content:'';flex:1;height:1px;background:var(--border)}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:500px){.g4,.g3,.g2{grid-template-columns:1fr}}
+
+  /* KPI BIG CARD */
+  .kb{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+  .kb::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+  .kb.red::before{background:var(--red)}.kb.grn::before{background:var(--green)}.kb.amb::before{background:var(--amber)}.kb.blue::before{background:var(--blue)}
+  .kb .kn{font-size:10px;font-weight:600;letter-spacing:.6px;color:var(--text2);text-transform:uppercase;margin-bottom:6px}
+  .kb .kv{font-size:32px;font-weight:700;line-height:1;margin-bottom:6px}
+  .kb.red .kv{color:var(--red)}.kb.grn .kv{color:var(--green)}.kb.amb .kv{color:var(--amber)}.kb.blue .kv{color:var(--blue)}
+  .kb .km{font-size:10px;color:var(--text3);line-height:1.5}
+  .kb .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.05);margin-top:12px}
+  .kb .fill{height:100%;border-radius:3px;transition:width .8s ease}
+  .kb.red .fill{background:var(--red)}.kb.grn .fill{background:var(--green)}.kb.amb .fill{background:var(--amber)}.kb.blue .fill{background:var(--blue)}
+  .badge{font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;position:absolute;top:16px;right:14px}
+  .badge.g{background:rgba(0,200,150,.15);color:var(--green)}
+  .badge.r{background:rgba(255,77,109,.15);color:var(--red)}
+  .badge.a{background:rgba(245,158,11,.15);color:var(--amber)}
+
+  /* SUMMARY ROW */
+  .srow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+  .sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+  .sc .sl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+  .sc .sv{font-size:18px;font-weight:600}
+  .sc.pos .sv{color:var(--green)}.sc.neg .sv{color:var(--red)}.sc.warn .sv{color:var(--amber)}
+
+  .cc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+  .cc .ct{font-size:12px;font-weight:500;color:var(--text);margin-bottom:10px}
+
+  .state-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;color:var(--text2);font-size:13px;text-align:center;gap:10px}
+  .spinner{width:30px;height:30px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .divider{height:1px;background:var(--border);margin:18px 0}
+</style>
+</head>
+<body>
+<div class="cbar"><div class="cfill" id="cdown" style="width:100%"></div></div>
+<div class="header">
+  <div class="brand">
+    <div class="logo">EN</div>
+    <div class="btext"><h1>KPI Financieros — Elite Nutrition</h1><p id="periodo">Cargando...</p></div>
+  </div>
+  <div class="hright">
+    <span class="sdot loading" id="sdot"></span>
+    <div class="rinfo">Próxima actualización: <span id="ctxt">—</span></div>
+    <button class="rbtn" onclick="loadData(true)">↺ Actualizar</button>
+  </div>
+</div>
+<div class="container" id="main">
+  <div class="state-screen"><div class="spinner"></div><div>Cargando KPIs...</div></div>
+</div>
+<script>
+const SHEET_CSV='https://docs.google.com/spreadsheets/d/e/2PACX-1vRniP8EVPgxpzTHLKeAzrG9AZum1GfvPqUEHY1LHAl_jSybRaFpVXMdxo3kZ8eW5KDRJx9ettLEW2kc/pub?gid=865947041&single=true&output=csv';
+const PROXY1='https://api.allorigins.win/raw?url=';
+const PROXY2='https://corsproxy.io/?';
+const REFRESH_MS=5*60*1000;
+let refreshTimer=null,countdownTimer=null,nextRefresh=null,charts=[];
+
+async function fetchCSV(){
+  const urls=[SHEET_CSV,PROXY1+encodeURIComponent(SHEET_CSV),PROXY2+encodeURIComponent(SHEET_CSV)];
+  let lastErr;
+  for(const url of urls){try{const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);const t=await res.text();if(t.trim().length<20)throw new Error('vacío');return t;}catch(e){lastErr=e;}}
+  throw lastErr;
+}
+function splitLine(line){const r=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){r.push(cur.replace(/^"|"$/g,'').trim());cur='';}else cur+=c;}r.push(cur.replace(/^"|"$/g,'').trim());return r;}
+function parseCSV(txt){const lines=txt.trim().split(/\r?\n/);const hdrs=splitLine(lines[0]);const rows=[];for(let i=1;i<lines.length;i++){if(!lines[i].trim())continue;const vals=splitLine(lines[i]);const row={};hdrs.forEach((h,j)=>{row[h.trim()]=(vals[j]||'').trim();});rows.push(row);}return{hdrs,rows};}
+function num(v){const s=String(v||'').replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.\-]/g,'');const n=parseFloat(s);return isNaN(n)?0:n;}
+function fmt(n,d=0){return new Intl.NumberFormat('es-CO',{maximumFractionDigits:d,minimumFractionDigits:d}).format(n);}
+function fmtM(n){if(n===null||isNaN(n))return'N/D';const s=n<0?'-':'';const a=Math.abs(n);if(a>=1e9)return s+'$'+fmt(a/1e9,2)+'B';if(a>=1e6)return s+'$'+fmt(a/1e6,1)+'M';if(a>=1e3)return s+'$'+fmt(a/1e3,0)+'K';return s+'$'+fmt(a,0);}
+function pw(v,mx){return Math.min(Math.max(Math.abs(v)/mx*100,2),100).toFixed(1)+'%';}
+function destroyCharts(){charts.forEach(c=>{try{c.destroy()}catch(e){}});charts=[];}
+
+function render(row,hdrs){
+  destroyCharts();
+  function g(k){if(row[k]!==undefined)return num(row[k]);const f=hdrs.find(h=>h.toLowerCase().trim()===k.toLowerCase());return f?num(row[f]):0;}
+  const cartera=g('CARTERA POR COBRAR'),dispCaja=g('DISPONIBLE EN CAJA'),dispBancos=g('DISPONIBLE EN BANCOS');
+  const invMP=g('INVENTARIO DE PRODUCTOS MARCA PROPIA ($)'),invCom=g('INVENTARIO DE PRODUCTOS COMERCIALIZADOS ($)'),invSouv=g('INVENTARIO DE SOUVENIR Y SUMINISTROS ($)');
+  const cxpBienes=g('CXP A PROVEEDORES DE BIENES'),cxpServ=g('CXP A PROVEEDORES DE SERVICIOS');
+  const impPagar=g('IMPUESTOS POR PAGAR'),honorarios=g('HONORARIOS POR PAGAR'),obligFin=g('OBLIGACIONES FINANCIERAS POR PAGAR');
+  const provisiones=g('PROVISIONES'),impRenta=g('IMPUESTOS DE RENTA POR PAGAR'),sobreGiro=g('SOBRE GIRO DE TARJETAS DE CREDITO'),obligLab=g('OBLIGACIONES LABORALES POR PAGAR');
+  const compraProd=g('COMPRA DE PRODUCTOS'),compraIns=g('COMPRA DE INSUMOS');
+  const fidMay=g('FIDELIZACION MAYORISTAS'),vtasMay=g('VENTAS MAYORISTAS (NUEVOS)'),tat=g('TAT'),ecommerce=g('ECOMMERCE'),chatcenter=g('CHATCENTER');
+  const plataformas=g('PLATAFORMAS'),dropship=g('DROPSHIPPING'),redesSoc=g('REDES SOCIALES'),marcaPerso=g('MARCA PERSONAL');
+  const intlUSA=g('INTERNACIONAL USA'),otrosPaises=g('OTROS PAISES- ECUADOR, PERU, PANAMA, CHILE - ESPAÑA, MEXICO'),fidMin=g('FIDELIZACION MINORISTAS'),camilaIA=g('CAMILA IA');
+
+  const inventario=invMP+invCom+invSouv;
+  const activoCte=cartera+dispCaja+dispBancos+inventario;
+  const pasivoCte=cxpBienes+cxpServ+impPagar+honorarios+obligFin+provisiones+impRenta+sobreGiro+obligLab;
+  const ingresosTot=fidMay+vtasMay+tat+ecommerce+chatcenter+plataformas+dropship+redesSoc+marcaPerso+intlUSA+otrosPaises+fidMin+camilaIA;
+  const comprasTot=compraProd+compraIns;
+  const cxpTot=cxpBienes+cxpServ;
+
+  const razonCte=pasivoCte>0?activoCte/pasivoCte:0;
+  const pruebaAc=pasivoCte>0?(activoCte-inventario)/pasivoCte:0;
+  const rotInvV=inventario>0?comprasTot/inventario:0;
+  const rotInvD=rotInvV>0?365/rotInvV:0;
+  const rotCartV=cartera>0?ingresosTot/cartera:0;
+  const rotCartD=rotCartV>0?365/rotCartV:0;
+  const rotProvV=cxpTot>0?comprasTot/cxpTot:0;
+  const rotProvD=rotProvV>0?365/rotProvV:0;
+  const endeud=activoCte>0?(pasivoCte/activoCte)*100:0;
+  const ctn=activoCte-pasivoCte;
+  const pctCTN=activoCte>0?(ctn/activoCte)*100:0;
+
+  function cls(v,g,ok){return v>=g?'grn':v>=ok?'amb':'red';}
+  function clsI(v,g,ok){return v<=g?'grn':v<=ok?'amb':'red';}
+  function bdg(v,g,ok,lb){return v>=g?['g',lb[0]]:v>=ok?['a',lb[1]]:['r',lb[2]];}
+  function bdgI(v,g,ok,lb){return v<=g?['g',lb[0]]:v<=ok?['a',lb[1]]:['r',lb[2]];}
+
+  const colMap={grn:'#00c896',amb:'#f59e0b',red:'#ff4d6d',blue:'#3b82f6'};
+  const rc_c=cls(razonCte,1.5,1.0),rc_b=bdg(razonCte,1.5,1.0,['Óptimo','Aceptable','Crítico']);
+  const pa_c=cls(pruebaAc,1.0,0.7),pa_b=bdg(pruebaAc,1.0,0.7,['Óptimo','Aceptable','Crítico']);
+  const ri_c=clsI(rotInvD,90,180),ri_b=bdgI(rotInvD,90,180,['Rápido','Moderado','Lento']);
+  const rca_c=clsI(rotCartD,30,60),rca_b=bdgI(rotCartD,30,60,['Ágil','Normal','Lento']);
+  const en_c=clsI(endeud,60,100),en_b=bdgI(endeud,60,100,['Bajo','Moderado','Alto']);
+  const ctn_c=ctn>=0?'grn':'red',ctn_b=ctn>=0?['g','Positivo']:['r','Negativo'];
+  const rp_c=clsI(rotProvD,60,120),rp_b=bdgI(rotProvD,60,120,['Óptimo','Normal','Alto']);
+
+  function kb(cl,kn,kv,km,bw,ba){return`<div class="kb ${cl}"><span class="badge ${ba[0]}">${ba[1]}</span><div class="kn">${kn}</div><div class="kv">${kv}</div><div class="km">${km}</div><div class="bar"><div class="fill" style="width:${bw}"></div></div></div>`;}
+
+  document.getElementById('main').innerHTML=`
+  <div class="srow">
+    <div class="sc pos"><div><div class="sl">Activo corriente</div><div class="sv">${fmtM(activoCte)}</div></div><span style="font-size:24px">📈</span></div>
+    <div class="sc neg"><div><div class="sl">Pasivo corriente</div><div class="sv">${fmtM(pasivoCte)}</div></div><span style="font-size:24px">📉</span></div>
+    <div class="sc ${ctn>=0?'pos':'neg'}"><div><div class="sl">Capital trabajo neto</div><div class="sv">${fmtM(ctn)}</div></div><span style="font-size:24px">${ctn>=0?'✅':'⚠️'}</span></div>
+  </div>
+  <div class="sec">Liquidez</div>
+  <div class="g4">
+    ${kb(rc_c,'Razón corriente',fmt(razonCte,2),`Activo ${fmtM(activoCte)} ÷ Pasivo ${fmtM(pasivoCte)}<br>Meta ≥ 1,5`,pw(razonCte,3),rc_b)}
+    ${kb(pa_c,'Prueba ácida',fmt(pruebaAc,2),`(Activo − Inventario) ÷ Pasivo<br>Meta ≥ 1,0`,pw(pruebaAc,2),pa_b)}
+    ${kb(ctn_c,'CTN %',fmt(pctCTN,1)+'%',`CTN ${fmtM(ctn)}<br>Activo − Pasivo corriente`,pw(Math.abs(pctCTN),100),ctn_b)}
+    ${kb(en_c,'Endeudamiento cte.',fmt(endeud,1)+'%',`Pasivo ÷ Activo × 100<br>Meta ≤ 60%`,Math.min(endeud,100).toFixed(1)+'%',en_b)}
+  </div>
+  <div class="sec">Eficiencia operativa</div>
+  <div class="g3">
+    ${kb(ri_c,'Rot. inventario',`${fmt(rotInvD,0)} días`,`${fmt(rotInvV,2)} veces<br>Compras ${fmtM(comprasTot)} ÷ Inv. ${fmtM(inventario)} × 365`,Math.min(rotInvD/365*100,100).toFixed(1)+'%',ri_b)}
+    ${kb(rca_c,'Rot. cartera',`${fmt(rotCartD,1)} días`,`${fmt(rotCartV,2)} veces<br>Ingresos ${fmtM(ingresosTot)} ÷ Cartera ${fmtM(cartera)} × 365`,Math.min(rotCartD/90*100,100).toFixed(1)+'%',rca_b)}
+    ${kb(rp_c,'Rot. proveedores',`${fmt(rotProvD,0)} días`,`${fmt(rotProvV,2)} veces<br>Compras ${fmtM(comprasTot)} ÷ CXP ${fmtM(cxpTot)} × 365`,Math.min(rotProvD/365*100,100).toFixed(1)+'%',rp_b)}
+  </div>
+  <div class="sec">Resumen visual</div>
+  <div class="g2">
+    <div class="cc">
+      <div class="ct">Semáforo de todos los KPIs</div>
+      <div id="sem"></div>
+    </div>
+    <div class="cc">
+      <div class="ct">Radar financiero</div>
+      <div style="position:relative;width:100%;height:260px"><canvas id="ch_radar"></canvas></div>
+    </div>
+  </div>`;
+
+  // Semáforo
+  const items=[
+    {l:'Razón corriente',v:fmt(razonCte,2),c:rc_c,m:'≥ 1,5'},
+    {l:'Prueba ácida',v:fmt(pruebaAc,2),c:pa_c,m:'≥ 1,0'},
+    {l:'Endeudamiento',v:fmt(endeud,1)+'%',c:en_c,m:'≤ 60%'},
+    {l:'Rot. inventario',v:fmt(rotInvD,0)+' días',c:ri_c,m:'≤ 90d'},
+    {l:'Rot. cartera',v:fmt(rotCartD,1)+' días',c:rca_c,m:'≤ 30d'},
+    {l:'Rot. proveedores',v:fmt(rotProvD,0)+' días',c:rp_c,m:'≤ 60d'},
+    {l:'CTN',v:fmtM(ctn),c:ctn_c,m:'> 0'},
+  ];
+  document.getElementById('sem').innerHTML=items.map(s=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${colMap[s.c]};box-shadow:0 0 6px ${colMap[s.c]};flex-shrink:0"></span>
+        <span style="font-size:11px;color:#8a9bbf">${s.l}</span>
+      </div>
+      <div>
+        <span style="font-size:13px;font-weight:600;color:${colMap[s.c]}">${s.v}</span>
+        <span style="font-size:10px;color:#4a5a7a;margin-left:6px">${s.m}</span>
+      </div>
+    </div>`).join('');
+
+  // Radar
+  function normalize(val,min,max){return Math.min(Math.max((val-min)/(max-min)*100,0),100);}
+  const radarData=[
+    normalize(razonCte,0,3),
+    normalize(pruebaAc,0,2),
+    normalize(100-endeud,0,100),
+    normalize(Math.max(0,365-rotInvD),0,365),
+    normalize(Math.max(0,90-rotCartD),0,90),
+    normalize(Math.max(0,120-rotProvD),0,120),
+    normalize(Math.max(0,pctCTN),-50,50),
+  ];
+  charts.push(new Chart(document.getElementById('ch_radar'),{
+    type:'radar',
+    data:{
+      labels:['Razón cte.','Prueba ácida','Bajo endeud.','Rot. inv.','Rot. cartera','Rot. prov.','CTN %'],
+      datasets:[{
+        data:radarData,
+        backgroundColor:'rgba(0,200,150,0.15)',
+        borderColor:'#00c896',
+        borderWidth:2,
+        pointBackgroundColor:'#00c896',
+        pointBorderColor:'#0b0f1a',
+        pointRadius:4,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{
+        min:0,max:100,
+        ticks:{display:false},
+        grid:{color:'rgba(255,255,255,0.07)'},
+        angleLines:{color:'rgba(255,255,255,0.07)'},
+        pointLabels:{color:'#8a9bbf',font:{size:10}}
+      }}
+    }
+  }));
+}
+
+function startCountdown(){
+  clearInterval(countdownTimer);nextRefresh=Date.now()+REFRESH_MS;
+  countdownTimer=setInterval(()=>{
+    const rem=Math.max(0,nextRefresh-Date.now());
+    document.getElementById('cdown').style.width=(rem/REFRESH_MS*100).toFixed(1)+'%';
+    const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);
+    document.getElementById('ctxt').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+    if(rem<=0)clearInterval(countdownTimer);
+  },500);
+}
+
+async function loadData(manual=false){
+  const dot=document.getElementById('sdot');dot.className='sdot loading';
+  if(manual){document.getElementById('main').innerHTML='<div class="state-screen"><div class="spinner"></div><div>Actualizando KPIs...</div></div>';}
+  try{
+    const text=await fetchCSV();
+    const{hdrs,rows}=parseCSV(text);
+    if(!rows.length)throw new Error('Sin datos');
+    const last=rows[rows.length-1];
+    const fi=last['FECHA INICIO']||'',ff=last['FECHA FINAL']||'';
+    document.getElementById('periodo').textContent=`${fi} → ${ff} | ${rows.length} registros`;
+    render(last,hdrs);dot.className='sdot';
+    clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>loadData(),REFRESH_MS);startCountdown();
+  }catch(e){
+    dot.className='sdot error';
+    document.getElementById('main').innerHTML=`<div class="state-screen"><div style="font-size:32px">⚠️</div><strong style="color:#ff4d6d">Error: ${e.message}</strong><br><button onclick="loadData(true)" style="padding:8px 20px;background:#1a2235;border:1px solid rgba(255,255,255,.15);color:#e8edf5;border-radius:8px;cursor:pointer;margin-top:8px">↺ Reintentar</button></div>`;
+    clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>loadData(),30000);
+  }
+}
+loadData();
+</script>
+</body>
+</html>
