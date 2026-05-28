@@ -7,40 +7,27 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
-  :root {
-    --bg:#0b0f1a; --bg2:#111827; --bg3:#1a2235; --bg4:#1e2d40;
-    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
-    --text:#e8edf5; --text2:#8a9bbf; --text3:#4a5a7a;
-    --green:#00c896; --red:#ff4d6d; --amber:#f59e0b;
-    --blue:#3b82f6; --purple:#8b5cf6; --teal:#14b8a6; --coral:#f97316; --pink:#ec4899;
-    --r:12px; --rs:8px;
-  }
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--bg4:#1e2d40;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#e8edf5;--text2:#8a9bbf;--text3:#4a5a7a;--green:#00c896;--red:#ff4d6d;--amber:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--teal:#14b8a6;--coral:#f97316;--pink:#ec4899;--r:12px;--rs:8px}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
-
   .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:100}
   .brand{display:flex;align-items:center;gap:12px}
   .logo{width:38px;height:38px;background:linear-gradient(135deg,#00c896,#0077b6);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;letter-spacing:.5px;flex-shrink:0}
   .btext h1{font-size:15px;font-weight:600;color:var(--text)}
   .btext p{font-size:11px;color:var(--text2);margin-top:1px}
   .hright{display:flex;align-items:center;gap:14px}
-  .rinfo{font-size:11px;color:var(--text3)}
-  .rinfo span{color:var(--green);font-weight:500}
+  .rinfo{font-size:11px;color:var(--text3)}.rinfo span{color:var(--green);font-weight:500}
   .rbtn{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:7px 14px;border-radius:var(--rs);cursor:pointer;font-size:12px;font-family:inherit;transition:background .2s}
   .rbtn:hover{background:var(--bg4)}
   .sdot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;animation:pulse 2s infinite}
   .sdot.loading{background:var(--amber);box-shadow:0 0 6px var(--amber)}
   .sdot.error{background:var(--red);box-shadow:0 0 6px var(--red);animation:none}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
   .cbar{height:2px;background:var(--border);position:fixed;top:62px;left:0;right:0;z-index:99}
   .cfill{height:100%;background:var(--green);box-shadow:0 0 6px var(--green);transition:width .5s linear}
-
   .container{padding:20px 28px;max-width:1600px;margin:0 auto}
-
   .sec{font-size:10px;font-weight:600;letter-spacing:1.2px;color:var(--text3);text-transform:uppercase;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
   .sec::after{content:'';flex:1;height:1px;background:var(--border)}
-
   .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
   .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
   .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -48,7 +35,6 @@
   @media(max-width:1200px){.g5{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:768px){.g5,.g4,.g3,.g2{grid-template-columns:1fr 1fr}}
   @media(max-width:480px){.g5,.g4,.g3,.g2{grid-template-columns:1fr}}
-
   .mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;transition:border-color .2s}
   .mc:hover{border-color:var(--border2)}
   .mc .lb{font-size:10px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;line-height:1.4}
@@ -56,7 +42,6 @@
   .mc .sb{font-size:10px;color:var(--text3);margin-top:4px}
   .mc .al{height:2px;border-radius:1px;margin-top:10px}
   .mc.pos .vl{color:var(--green)}.mc.neg .vl{color:var(--red)}.mc.warn .vl{color:var(--amber)}.mc.blue .vl{color:var(--blue)}
-
   .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
   .kpi .tr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
   .kpi .kn{font-size:10px;font-weight:600;letter-spacing:.5px;color:var(--text2);text-transform:uppercase}
@@ -65,42 +50,32 @@
   .kpi .bar{height:4px;border-radius:2px;background:rgba(255,255,255,.05);margin-top:10px}
   .kpi .fill{height:100%;border-radius:2px;transition:width .8s ease}
   .badge{font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.3px}
-  .badge.g{background:rgba(0,200,150,.15);color:var(--green)}
-  .badge.r{background:rgba(255,77,109,.15);color:var(--red)}
-  .badge.a{background:rgba(245,158,11,.15);color:var(--amber)}
+  .badge.g{background:rgba(0,200,150,.15);color:var(--green)}.badge.r{background:rgba(255,77,109,.15);color:var(--red)}.badge.a{background:rgba(245,158,11,.15);color:var(--amber)}
   .kpi.red .kv{color:var(--red)}.kpi.red .fill{background:var(--red)}
   .kpi.grn .kv{color:var(--green)}.kpi.grn .fill{background:var(--green)}
   .kpi.amb .kv{color:var(--amber)}.kpi.amb .fill{background:var(--amber)}
-  .kpi.blue .kv{color:var(--blue)}.kpi.blue .fill{background:var(--blue)}
-
   .cc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px}
   .cc .ct{font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px}
   .leg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
   .leg span{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2)}
   .leg span b{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
-
   .state-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;color:var(--text2);font-size:14px;text-align:center;gap:12px}
   .spinner{width:34px;height:34px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .ebox{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);border-radius:var(--r);padding:16px 20px;max-width:520px;font-size:12px;color:var(--text2);line-height:1.8;text-align:left}
-
+  .ebox{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);border-radius:var(--r);padding:16px 20px;max-width:520px;font-size:12px;color:var(--text2);line-height:1.8}
   .divider{height:1px;background:var(--border);margin:24px 0}
-
   .pbadge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.2);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--green)}
-
   .footer{text-align:center;font-size:11px;color:var(--text3);padding:16px 28px 28px;border-top:1px solid var(--border);margin-top:28px}
 </style>
 </head>
 <body>
-
 <div class="cbar"><div class="cfill" id="cdown" style="width:100%"></div></div>
-
 <div class="header">
   <div class="brand">
     <div class="logo">EN</div>
     <div class="btext">
       <h1>Dashboard Financiero — Elite Nutrition</h1>
-      <p id="periodo">Conectando con Google Sheets...</p>
+      <p id="periodo">Conectando con Supabase...</p>
     </div>
   </div>
   <div class="hright">
@@ -109,152 +84,90 @@
     <button class="rbtn" onclick="loadData(true)">↺ Actualizar ahora</button>
   </div>
 </div>
-
 <div class="container" id="main">
-  <div class="state-screen">
-    <div class="spinner"></div>
-    <div>Cargando datos desde Google Sheets...</div>
-  </div>
+  <div class="state-screen"><div class="spinner"></div><div>Cargando datos desde Supabase...</div></div>
 </div>
-
-<div class="footer" id="footer" style="display:none">
-  Elite Nutrition SAS &nbsp;|&nbsp; Dashboard financiero en vivo &nbsp;|&nbsp; Auto-refresh cada 5 minutos &nbsp;|&nbsp; Fuente: Google Sheets
-</div>
+<div class="footer" id="footer" style="display:none">Elite Nutrition SAS &nbsp;|&nbsp; Fuente: Supabase — indicadores_gestion &nbsp;|&nbsp; Auto-refresh cada 5 minutos</div>
 
 <script>
-// ── CONFIG ──
-const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRniP8EVPgxpzTHLKeAzrG9AZum1GfvPqUEHY1LHAl_jSybRaFpVXMdxo3kZ8eW5KDRJx9ettLEW2kc/pub?gid=865947041&single=true&output=csv';
-const PROXY1 = 'https://api.allorigins.win/raw?url=';
-const PROXY2 = 'https://corsproxy.io/?';
+const SB  = 'https://kpqwwfianohqkdhshvnt.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwcXd3Zmlhbm9ocWtkaHNodm50Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDg4MzczOCwiZXhwIjoyMDkwNDU5NzM4fQ.mKVLx_Dzanmk_Yj8_V2q91WKAWKMhWPsjVCXKapCZhI';
+const H   = {'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Accept':'application/json'};
 const REFRESH_MS = 5 * 60 * 1000;
+let refreshTimer=null, countdownTimer=null, nextRefresh=null, charts=[];
 
-let refreshTimer = null, countdownTimer = null, nextRefresh = null;
-let charts = [];
-
-// ── FETCH con fallback de proxies ──
-async function fetchCSV() {
-  const urls = [
-    SHEET_CSV,                        // directo (funciona en servidor / hosting)
-    PROXY1 + encodeURIComponent(SHEET_CSV),  // proxy 1
-    PROXY2 + encodeURIComponent(SHEET_CSV),  // proxy 2
-  ];
-  let lastErr;
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const text = await res.text();
-      if (text.trim().length < 20) throw new Error('Respuesta vacía');
-      return text;
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr;
+async function fetchLastRow() {
+  const r = await fetch(`${SB}/rest/v1/indicadores_gestion?order=created_at.desc&limit=1`, {headers: H});
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const data = await r.json();
+  if (!data.length) throw new Error('Sin registros en indicadores_gestion');
+  return data[0];
 }
 
-// ── CSV PARSER ──
-function splitLine(line) {
-  const r = []; let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { r.push(cur.replace(/^"|"$/g, '').trim()); cur = ''; }
-    else cur += c;
-  }
-  r.push(cur.replace(/^"|"$/g, '').trim());
-  return r;
-}
-function parseCSV(txt) {
-  const lines = txt.trim().split(/\r?\n/);
-  const hdrs = splitLine(lines[0]);
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    const vals = splitLine(lines[i]);
-    const row = {};
-    hdrs.forEach((h, j) => { row[h.trim()] = (vals[j] || '').trim(); });
-    rows.push(row);
-  }
-  return { hdrs, rows };
-}
-
-// ── NUMBERS ──
-function num(v) {
-  const s = String(v || '').replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.\-]/g,'');
-  const n = parseFloat(s); return isNaN(n) ? 0 : n;
-}
-function fmt(n, d=0) { return new Intl.NumberFormat('es-CO',{maximumFractionDigits:d,minimumFractionDigits:d}).format(n); }
-function fmtM(n) {
-  if (n === null || isNaN(n)) return 'N/D';
-  const s = n < 0 ? '-' : ''; const a = Math.abs(n);
-  if (a >= 1e9) return s+'$'+fmt(a/1e9,2)+'B';
-  if (a >= 1e6) return s+'$'+fmt(a/1e6,1)+'M';
-  if (a >= 1e3) return s+'$'+fmt(a/1e3,0)+'K';
+function n(v) { return (v === null || v === undefined) ? 0 : Number(v); }
+function fmt(v,d=0){ return new Intl.NumberFormat('es-CO',{maximumFractionDigits:d,minimumFractionDigits:d}).format(v); }
+function fmtM(v){
+  const s=v<0?'-':''; const a=Math.abs(v);
+  if(a>=1e9) return s+'$'+fmt(a/1e9,2)+'B';
+  if(a>=1e6) return s+'$'+fmt(a/1e6,1)+'M';
+  if(a>=1e3) return s+'$'+fmt(a/1e3,0)+'K';
   return s+'$'+fmt(a,0);
 }
-function pw(val, max) { return Math.min(Math.max(Math.abs(val)/max*100,2),100).toFixed(1)+'%'; }
+function pw(v,mx){return Math.min(Math.max(Math.abs(v)/mx*100,2),100).toFixed(1)+'%';}
+function destroyCharts(){charts.forEach(c=>{try{c.destroy()}catch(e){}});charts=[];}
 
-// ── CHARTS ──
-function destroyCharts() { charts.forEach(c=>{try{c.destroy()}catch(e){}}); charts=[]; }
-const GC='rgba(255,255,255,0.04)', TC='#4a5a7a';
-
-// ── RENDER ──
-function render(row, hdrs, totalRows) {
+function render(d) {
   destroyCharts();
 
-  function g(key) {
-    if (row[key] !== undefined) return num(row[key]);
-    const kl = key.toLowerCase();
-    const f = hdrs.find(h => h.toLowerCase().trim() === kl);
-    return f ? num(row[f]) : 0;
-  }
+  // RAW VALUES — directo de Supabase (ya son numbers limpios)
+  const cartera     = n(d.cartera_por_cobrar);
+  const dispCaja    = n(d.disponible_caja);
+  const ingCaja     = n(d.ingresos_caja);
+  const pagCaja     = n(d.pagos_caja);
+  const dispBancos  = n(d.disponible_bancos);
+  const ingBancos   = n(d.ingresos_bancos);
+  const pagBancos   = n(d.pagos_bancos);
+  const invMP       = n(d.inventario_productos_marca_propia_pesos);
+  const invCom      = n(d.inventario_productos_comercializados_pesos);
+  const invSouv     = n(d.inventario_souvenir_suministros_pesos);
+  const cxpBienes   = n(d.cxp_proveedores_bienes);
+  const cxpServ     = n(d.cxp_proveedores_servicios);
+  const impPagar    = n(d.impuestos_por_pagar);
+  const honorarios  = n(d.honorarios_por_pagar);
+  const obligFin    = n(d.obligaciones_financieras);
+  const provisiones = n(d.provisiones);
+  const impRenta    = n(d.impuestos_renta_por_pagar);
+  const sobreGiro   = n(d.sobregiro_tarjetas_credito);
+  const obligLab    = n(d.obligaciones_laborales_por_pagar);
+  const compraProd  = n(d.compra_productos);
+  const compraIns   = n(d.compra_insumos);
+  const gtoComercial= n(d.gasto_comercializacion);
+  const gtoMkt      = n(d.gastos_marketing_mercadeo);
+  const gtoLogistica= n(d.gastos_logistica);
+  const gtoAdmin    = n(d.gastos_administrativos);
+  const gtoFin      = n(d.gastos_financieros);
+  const gtoImp      = n(d.gastos_impuestos);
+  const fidMay      = n(d.fidelizacion_mayoristas);
+  const vtasMay     = n(d.ventas_mayoristas_nuevos);
+  const tat         = n(d.tat);
+  const ecommerce   = n(d.ecommerce);
+  const chatcenter  = n(d.chatcenter);
+  const plataformas = n(d.plataformas);
+  const dropship    = n(d.dropshipping);
+  const redesSoc    = n(d.redes_sociales);
+  const marcaPerso  = n(d.marca_personal);
+  const intlUSA     = n(d.internacional_usa);
+  const otrosPaises = n(d.otros_paises);
+  const fidMin      = n(d.fidelizacion_minoristas);
+  const camilaIA    = n(d.camila_ia);
 
-  const cartera     = g('CARTERA POR COBRAR');
-  const dispCaja    = g('DISPONIBLE EN CAJA');
-  const ingCaja     = g('INGRESOS EN CAJA');
-  const pagCaja     = g('PAGOS DE CAJA');
-  const dispBancos  = g('DISPONIBLE EN BANCOS');
-  const ingBancos   = g('INGRESOS EN BANCOS');
-  const pagBancos   = g('PAGOS POR BANCOS');
-  const invMP       = g('INVENTARIO DE PRODUCTOS MARCA PROPIA ($)');
-  const invCom      = g('INVENTARIO DE PRODUCTOS COMERCIALIZADOS ($)');
-  const invSouv     = g('INVENTARIO DE SOUVENIR Y SUMINISTROS ($)');
-  const cxpBienes   = g('CXP A PROVEEDORES DE BIENES');
-  const cxpServ     = g('CXP A PROVEEDORES DE SERVICIOS');
-  const impPagar    = g('IMPUESTOS POR PAGAR');
-  const honorarios  = g('HONORARIOS POR PAGAR');
-  const obligFin    = g('OBLIGACIONES FINANCIERAS POR PAGAR');
-  const provisiones = g('PROVISIONES');
-  const impRenta    = g('IMPUESTOS DE RENTA POR PAGAR');
-  const sobreGiro   = g('SOBRE GIRO DE TARJETAS DE CREDITO');
-  const obligLab    = g('OBLIGACIONES LABORALES POR PAGAR');
-  const compraProd  = g('COMPRA DE PRODUCTOS');
-  const compraIns   = g('COMPRA DE INSUMOS');
-  const gtoComercial= g('GASTO DE COMERCIALIZACION');
-  const gtoMkt      = g('GASTOS DE MARKETING Y MERCADEO');
-  const gtoLogistica= g('GASTOS DE LOGISTICA');
-  const gtoAdmin    = g('GASTOS ADMINISTRATIVOS');
-  const gtoFin      = g('GASTOS FINANCIEROS');
-  const gtoImp      = g('GASTOS DE IMPUESTOS');
-  const fidMay      = g('FIDELIZACION MAYORISTAS');
-  const vtasMay     = g('VENTAS MAYORISTAS (NUEVOS)');
-  const tat         = g('TAT');
-  const ecommerce   = g('ECOMMERCE');
-  const chatcenter  = g('CHATCENTER');
-  const plataformas = g('PLATAFORMAS');
-  const dropship    = g('DROPSHIPPING');
-  const redesSoc    = g('REDES SOCIALES');
-  const marcaPerso  = g('MARCA PERSONAL');
-  const intlUSA     = g('INTERNACIONAL USA');
-  const otrosPaises = g('OTROS PAISES- ECUADOR, PERU, PANAMA, CHILE - ESPAÑA, MEXICO');
-  const fidMin      = g('FIDELIZACION MINORISTAS');
-  const camilaIA    = g('CAMILA IA');
-
-  // CALCULATED
+  // CALCULATED KPIs
   const inventario  = invMP + invCom + invSouv;
   const activoCte   = cartera + dispCaja + dispBancos + inventario;
   const pasivoCte   = cxpBienes + cxpServ + impPagar + honorarios + obligFin + provisiones + impRenta + sobreGiro + obligLab;
   const ingresosTot = fidMay + vtasMay + tat + ecommerce + chatcenter + plataformas + dropship + redesSoc + marcaPerso + intlUSA + otrosPaises + fidMin + camilaIA;
   const comprasTot  = compraProd + compraIns;
+  const cxpTot      = cxpBienes + cxpServ;
 
   const razonCte  = pasivoCte>0 ? activoCte/pasivoCte : 0;
   const pruebaAc  = pasivoCte>0 ? (activoCte-inventario)/pasivoCte : 0;
@@ -262,17 +175,16 @@ function render(row, hdrs, totalRows) {
   const rotInvD   = rotInvV>0 ? 365/rotInvV : 0;
   const rotCartV  = cartera>0 ? ingresosTot/cartera : 0;
   const rotCartD  = rotCartV>0 ? 365/rotCartV : 0;
-  const cxpTot    = cxpBienes+cxpServ;
   const rotProvV  = cxpTot>0 ? comprasTot/cxpTot : 0;
   const rotProvD  = rotProvV>0 ? 365/rotProvV : 0;
   const endeud    = activoCte>0 ? (pasivoCte/activoCte)*100 : 0;
-  const ctn       = activoCte-pasivoCte;
+  const ctn       = activoCte - pasivoCte;
   const pctCTN    = activoCte>0 ? (ctn/activoCte)*100 : 0;
 
-  function cls(v,g,ok)    {return v>=g?'grn':v>=ok?'amb':'red'}
-  function clsI(v,g,ok)   {return v<=g?'grn':v<=ok?'amb':'red'}
-  function bdg(v,g,ok,lb) {return v>=g?['g',lb[0]]:v>=ok?['a',lb[1]]:['r',lb[2]]}
-  function bdgI(v,g,ok,lb){return v<=g?['g',lb[0]]:v<=ok?['a',lb[1]]:['r',lb[2]]}
+  function cls(v,g,ok)    {return v>=g?'grn':v>=ok?'amb':'red';}
+  function clsI(v,g,ok)   {return v<=g?'grn':v<=ok?'amb':'red';}
+  function bdg(v,g,ok,lb) {return v>=g?['g',lb[0]]:v>=ok?['a',lb[1]]:['r',lb[2]];}
+  function bdgI(v,g,ok,lb){return v<=g?['g',lb[0]]:v<=ok?['a',lb[1]]:['r',lb[2]];}
 
   const rc_c=cls(razonCte,1.5,1.0);  const rc_b=bdg(razonCte,1.5,1.0,['Óptimo','Aceptable','Crítico']);
   const pa_c=cls(pruebaAc,1.0,0.7);  const pa_b=bdg(pruebaAc,1.0,0.7,['Óptimo','Aceptable','Crítico']);
@@ -298,17 +210,13 @@ function render(row, hdrs, totalRows) {
     {l:'Camila IA',         v:camilaIA, c:'#2dd4bf'},
   ].filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
 
-  function mc(cls,lb,vl,sb,ac){
-    return `<div class="mc ${cls}"><div class="lb">${lb}</div><div class="vl">${vl}</div>${sb?`<div class="sb">${sb}</div>`:''}<div class="al" style="background:${ac||'transparent'}"></div></div>`;
-  }
-  function kcard(cl,kn,kv,km,bw,ba){
-    return `<div class="kpi ${cl}"><div class="tr"><div class="kn">${kn}</div><span class="badge ${ba[0]}">${ba[1]}</span></div><div class="kv">${kv}</div><div class="km">${km}</div><div class="bar"><div class="fill" style="width:${bw}"></div></div></div>`;
-  }
+  function mc(cl,lb,vl,sb,ac){return `<div class="mc ${cl}"><div class="lb">${lb}</div><div class="vl">${vl}</div>${sb?`<div class="sb">${sb}</div>`:''}<div class="al" style="background:${ac||'transparent'}"></div></div>`;}
+  function kcard(cl,kn,kv,km,bw,ba){return `<div class="kpi ${cl}"><div class="tr"><div class="kn">${kn}</div><span class="badge ${ba[0]}">${ba[1]}</span></div><div class="kv">${kv}</div><div class="km">${km}</div><div class="bar"><div class="fill" style="width:${bw}"></div></div></div>`;}
 
   document.getElementById('main').innerHTML=`
   <div class="sec">Activos corrientes</div>
   <div class="g5">
-    ${mc('blue','Activo corriente total',fmtM(activoCte),`Cartera + Caja + Bancos + Inventario`,'#3b82f6')}
+    ${mc('blue','Activo corriente total',fmtM(activoCte),'Cartera + Caja + Bancos + Inventario','#3b82f6')}
     ${mc('','Cartera por cobrar',fmtM(cartera),`Rot. ${fmt(rotCartD,1)} días`,'#8b5cf6')}
     ${mc('pos','Disponible en caja',fmtM(dispCaja),`Ingresos caja: ${fmtM(ingCaja)}`,'#00c896')}
     ${mc('pos','Disponible en bancos',fmtM(dispBancos),`Ingresos bancos: ${fmtM(ingBancos)}`,'#00c896')}
@@ -343,61 +251,40 @@ function render(row, hdrs, totalRows) {
     ${kcard(rc_c,'Razón corriente',fmt(razonCte,2),`Activo ${fmtM(activoCte)} ÷ Pasivo ${fmtM(pasivoCte)} | Meta ≥ 1,5`,pw(razonCte,3),rc_b)}
     ${kcard(pa_c,'Prueba ácida',fmt(pruebaAc,2),`(Activo − Inventario) ÷ Pasivo | Meta ≥ 1,0`,pw(pruebaAc,2),pa_b)}
     ${kcard(ctn_c,'Capital trabajo neto',fmtM(ctn),`% CTN: ${fmt(pctCTN,1)}% | Activo − Pasivo corriente`,pw(Math.abs(pctCTN),100),ctn_b)}
-    ${kcard(ri_c,'Rot. inventario',`${fmt(rotInvD,0)} días`,`${fmt(rotInvV,2)} veces | Compras ${fmtM(comprasTot)} ÷ Inv. ${fmtM(inventario)} × 365`,(Math.min(rotInvD/365*100,100)).toFixed(1)+'%',ri_b)}
-    ${kcard(rca_c,'Rot. cartera',`${fmt(rotCartD,1)} días`,`${fmt(rotCartV,2)} veces | Ingresos ${fmtM(ingresosTot)} ÷ Cartera ${fmtM(cartera)} × 365`,(Math.min(rotCartD/90*100,100)).toFixed(1)+'%',rca_b)}
-    ${kcard(en_c,'Endeudamiento cte.',`${fmt(endeud,1)}%`,`Pasivo ${fmtM(pasivoCte)} ÷ Activo ${fmtM(activoCte)} × 100 | Meta ≤ 60%`,(Math.min(endeud,100)).toFixed(1)+'%',en_b)}
-    ${kcard(rp_c,'Rot. proveedores',`${fmt(rotProvD,0)} días`,`${fmt(rotProvV,2)} veces | Compras ${fmtM(comprasTot)} ÷ CXP ${fmtM(cxpTot)} × 365`,(Math.min(rotProvD/365*100,100)).toFixed(1)+'%',rp_b)}
+    ${kcard(ri_c,'Rot. inventario',`${fmt(rotInvD,0)} días`,`${fmt(rotInvV,2)} veces | Compras ${fmtM(comprasTot)} ÷ Inv. ${fmtM(inventario)} × 365`,Math.min(rotInvD/365*100,100).toFixed(1)+'%',ri_b)}
+    ${kcard(rca_c,'Rot. cartera',`${fmt(rotCartD,1)} días`,`${fmt(rotCartV,2)} veces | Ingresos ${fmtM(ingresosTot)} ÷ Cartera ${fmtM(cartera)} × 365`,Math.min(rotCartD/90*100,100).toFixed(1)+'%',rca_b)}
+    ${kcard(en_c,'Endeudamiento cte.',`${fmt(endeud,1)}%`,`Pasivo ${fmtM(pasivoCte)} ÷ Activo ${fmtM(activoCte)} × 100 | Meta ≤ 60%`,Math.min(endeud,100).toFixed(1)+'%',en_b)}
+    ${kcard(rp_c,'Rot. proveedores',`${fmt(rotProvD,0)} días`,`${fmt(rotProvV,2)} veces | Compras ${fmtM(comprasTot)} ÷ CXP ${fmtM(cxpTot)} × 365`,Math.min(rotProvD/365*100,100).toFixed(1)+'%',rp_b)}
   </div>
   <div class="sec">Análisis visual</div>
   <div class="cc" style="margin-bottom:10px">
-    <div class="ct">Ingresos por canal de venta</div>
+    <div class="ct">Ingresos por canal de venta — período actual</div>
     <div class="leg">${canales.map(c=>`<span><b style="background:${c.c}"></b>${c.l} <strong style="color:#e8edf5">${fmtM(c.v)}</strong></span>`).join('')}</div>
     <div style="position:relative;width:100%;height:${Math.max(canales.length*38+50,180)}px"><canvas id="ch1"></canvas></div>
   </div>
   <div class="g2" style="margin-bottom:10px">
-    <div class="cc">
-      <div class="ct">Composición activo corriente</div>
-      <div style="position:relative;width:100%;height:220px"><canvas id="ch2"></canvas></div>
-    </div>
-    <div class="cc">
-      <div class="ct">Activo vs Pasivo vs CTN</div>
-      <div style="position:relative;width:100%;height:220px"><canvas id="ch3"></canvas></div>
-    </div>
+    <div class="cc"><div class="ct">Composición activo corriente</div><div style="position:relative;width:100%;height:220px"><canvas id="ch2"></canvas></div></div>
+    <div class="cc"><div class="ct">Activo vs Pasivo vs CTN</div><div style="position:relative;width:100%;height:220px"><canvas id="ch3"></canvas></div></div>
   </div>
   <div class="g2">
-    <div class="cc">
-      <div class="ct">Gastos operativos</div>
-      <div style="position:relative;width:100%;height:220px"><canvas id="ch4"></canvas></div>
-    </div>
-    <div class="cc">
-      <div class="ct">Semáforo de liquidez</div>
-      <div id="sem" style="padding-top:4px"></div>
-    </div>
+    <div class="cc"><div class="ct">Gastos operativos</div><div style="position:relative;width:100%;height:220px"><canvas id="ch4"></canvas></div></div>
+    <div class="cc"><div class="ct">Semáforo de liquidez</div><div id="sem" style="padding-top:4px"></div></div>
   </div>`;
 
-  // Semáforo
   const colMap={grn:'#00c896',amb:'#f59e0b',red:'#ff4d6d'};
-  const semItems=[
-    {l:'Razón corriente',        v:fmt(razonCte,2),   c:rc_c,  m:'meta ≥ 1,5'},
-    {l:'Prueba ácida',           v:fmt(pruebaAc,2),   c:pa_c,  m:'meta ≥ 1,0'},
-    {l:'Endeudamiento',          v:fmt(endeud,1)+'%', c:en_c,  m:'meta ≤ 60%'},
-    {l:'Rot. inventario (días)', v:fmt(rotInvD,0),    c:ri_c,  m:'meta ≤ 90d'},
-    {l:'Rot. cartera (días)',    v:fmt(rotCartD,1),   c:rca_c, m:'meta ≤ 30d'},
-    {l:'Rot. proveedores (días)',v:fmt(rotProvD,0),   c:rp_c,  m:'meta ≤ 60d'},
-    {l:'CTN',                    v:fmtM(ctn),         c:ctn_c, m:'debe ser > 0'},
-  ];
-  document.getElementById('sem').innerHTML=semItems.map(s=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="width:8px;height:8px;border-radius:50%;background:${colMap[s.c]};box-shadow:0 0 5px ${colMap[s.c]};flex-shrink:0"></span>
-        <span style="font-size:11px;color:#8a9bbf">${s.l}</span>
-      </div>
-      <div>
-        <span style="font-size:13px;font-weight:600;color:${colMap[s.c]}">${s.v}</span>
-        <span style="font-size:10px;color:#4a5a7a;margin-left:6px">${s.m}</span>
-      </div>
-    </div>`).join('');
+  document.getElementById('sem').innerHTML=[
+    {l:'Razón corriente',v:fmt(razonCte,2),c:rc_c,m:'≥ 1,5'},
+    {l:'Prueba ácida',v:fmt(pruebaAc,2),c:pa_c,m:'≥ 1,0'},
+    {l:'Endeudamiento',v:fmt(endeud,1)+'%',c:en_c,m:'≤ 60%'},
+    {l:'Rot. inventario',v:fmt(rotInvD,0)+' días',c:ri_c,m:'≤ 90d'},
+    {l:'Rot. cartera',v:fmt(rotCartD,1)+' días',c:rca_c,m:'≤ 30d'},
+    {l:'Rot. proveedores',v:fmt(rotProvD,0)+' días',c:rp_c,m:'≤ 60d'},
+    {l:'CTN',v:fmtM(ctn),c:ctn_c,m:'> 0'},
+  ].map(s=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+    <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${colMap[s.c]};box-shadow:0 0 5px ${colMap[s.c]};flex-shrink:0"></span><span style="font-size:11px;color:#8a9bbf">${s.l}</span></div>
+    <div><span style="font-size:13px;font-weight:600;color:${colMap[s.c]}">${s.v}</span><span style="font-size:10px;color:#4a5a7a;margin-left:6px">${s.m}</span></div></div>`).join('');
 
+  const GC='rgba(255,255,255,0.04)',TC='#4a5a7a';
   const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
 
   charts.push(new Chart(document.getElementById('ch1'),{type:'bar',
@@ -410,73 +297,45 @@ function render(row, hdrs, totalRows) {
 
   charts.push(new Chart(document.getElementById('ch3'),{type:'bar',
     data:{labels:['Activo cte.','Pasivo cte.','CTN'],datasets:[{data:[+(activoCte/1e6).toFixed(2),+(pasivoCte/1e6).toFixed(2),+(ctn/1e6).toFixed(2)],backgroundColor:['#3b82f6','#ff4d6d',ctn>=0?'#00c896':'#ff4d6d'],borderRadius:6,borderSkipped:false}]},
-    options:{...base,scales:{x:{ticks:{color:TC,font:{size:11}},grid:{display:false},border:{display:false}},y:{ticks:{color:TC,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:GC},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return (v<0?'-':'')+'$'+Math.abs(v).toFixed(1)+'M'}}}}}}));
+    options:{...base,scales:{x:{ticks:{color:TC,font:{size:11}},grid:{display:false},border:{display:false}},y:{ticks:{color:TC,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:GC},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return (v<0?'-':'')+'$'+Math.abs(v).toFixed(1)+'M'}}}}}));
 
-  const gd=[
-    {l:'Administrativos',v:gtoAdmin,c:'#3b82f6'},{l:'Marketing',v:gtoMkt,c:'#f59e0b'},
-    {l:'Logística',v:gtoLogistica,c:'#14b8a6'},{l:'Financieros',v:gtoFin,c:'#ff4d6d'},
-    {l:'Comercialización',v:gtoComercial,c:'#8b5cf6'},{l:'Impuestos',v:gtoImp,c:'#f97316'},
-  ].filter(x=>x.v>0);
+  const gd=[{l:'Administrativos',v:gtoAdmin,c:'#3b82f6'},{l:'Marketing',v:gtoMkt,c:'#f59e0b'},{l:'Logística',v:gtoLogistica,c:'#14b8a6'},{l:'Financieros',v:gtoFin,c:'#ff4d6d'},{l:'Comercialización',v:gtoComercial,c:'#8b5cf6'},{l:'Impuestos',v:gtoImp,c:'#f97316'}].filter(x=>x.v>0);
   charts.push(new Chart(document.getElementById('ch4'),{type:'doughnut',
     data:{labels:gd.map(x=>x.l),datasets:[{data:gd.map(x=>+(x.v/1e6).toFixed(2)),backgroundColor:gd.map(x=>x.c),borderWidth:2,borderColor:'#111827'}]},
     options:{...base,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8a9bbf',font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.toFixed(1)+'M'}}}}}));
 }
 
-// ── COUNTDOWN ──
-function startCountdown() {
-  clearInterval(countdownTimer);
-  nextRefresh = Date.now() + REFRESH_MS;
-  countdownTimer = setInterval(()=>{
-    const rem = Math.max(0, nextRefresh - Date.now());
-    document.getElementById('cdown').style.width = (rem/REFRESH_MS*100).toFixed(1)+'%';
-    const m = Math.floor(rem/60000), s = Math.floor((rem%60000)/1000);
-    document.getElementById('ctxt').textContent = `${m}:${s.toString().padStart(2,'0')}`;
-    if (rem<=0) clearInterval(countdownTimer);
-  }, 500);
+function startCountdown(){
+  clearInterval(countdownTimer); nextRefresh=Date.now()+REFRESH_MS;
+  countdownTimer=setInterval(()=>{
+    const rem=Math.max(0,nextRefresh-Date.now());
+    document.getElementById('cdown').style.width=(rem/REFRESH_MS*100).toFixed(1)+'%';
+    const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);
+    document.getElementById('ctxt').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+    if(rem<=0) clearInterval(countdownTimer);
+  },500);
 }
 
-// ── LOAD ──
-async function loadData(manual=false) {
-  const dot = document.getElementById('sdot');
-  dot.className = 'sdot loading';
-  if (manual) {
-    document.getElementById('main').innerHTML=`<div class="state-screen"><div class="spinner"></div><div>Actualizando datos...</div></div>`;
-  }
-  try {
-    const text = await fetchCSV();
-    const {hdrs, rows} = parseCSV(text);
-    if (!rows.length) throw new Error('El sheet no tiene filas de datos');
-    const last = rows[rows.length-1];
-    const fi = last['FECHA INICIO']||'', ff = last['FECHA FINAL']||'', ts = last['Marca temporal']||'';
-    document.getElementById('periodo').innerHTML =
-      `<span class="pbadge">📅 ${fi} → ${ff}</span>&nbsp; Actualizado: ${ts} &nbsp;|&nbsp; ${rows.length} registros`;
-    render(last, hdrs, rows.length);
-    dot.className = 'sdot';
+async function loadData(manual=false){
+  const dot=document.getElementById('sdot'); dot.className='sdot loading';
+  if(manual) document.getElementById('main').innerHTML='<div class="state-screen"><div class="spinner"></div><div>Actualizando datos...</div></div>';
+  try{
+    const row = await fetchLastRow();
+    const fi=row.fecha_inicio||'', ff=row.fecha_final||'', ts=row.updated_at||row.created_at||'';
+    document.getElementById('periodo').innerHTML=`<span class="pbadge">📅 ${fi} → ${ff}</span>&nbsp; Actualizado: ${new Date(ts).toLocaleString('es-CO')}`;
+    render(row);
+    document.getElementById('sdot').className='sdot';
     document.getElementById('footer').style.display='block';
     clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(()=>loadData(), REFRESH_MS);
+    refreshTimer=setTimeout(()=>loadData(), REFRESH_MS);
     startCountdown();
-  } catch(e) {
-    dot.className = 'sdot error';
-    document.getElementById('main').innerHTML=`
-      <div class="state-screen">
-        <div style="font-size:36px">⚠️</div>
-        <strong style="color:#ff4d6d;font-size:16px">Error al cargar los datos</strong>
-        <div class="ebox">
-          <strong>Causa:</strong> ${e.message}<br><br>
-          Se intentaron 3 métodos de conexión (directo + 2 proxies CORS) y todos fallaron.<br><br>
-          <strong>Soluciones:</strong><br>
-          1. Sube este archivo a cualquier hosting (Netlify, GitHub Pages, etc.)<br>
-          2. Úsalo desde VS Code con la extensión Live Server<br>
-          3. Verifica que el sheet siga publicado como CSV
-        </div>
-        <button onclick="loadData(true)" style="padding:10px 24px;background:#1a2235;border:1px solid rgba(255,255,255,.15);color:#e8edf5;border-radius:8px;cursor:pointer;font-size:13px">↺ Reintentar</button>
-      </div>`;
+  } catch(e){
+    document.getElementById('sdot').className='sdot error';
+    document.getElementById('main').innerHTML=`<div class="state-screen"><div style="font-size:36px">⚠️</div><strong style="color:#ff4d6d;font-size:16px">Error al cargar los datos</strong><div class="ebox"><strong>Causa:</strong> ${e.message}</div><button onclick="loadData(true)" style="padding:10px 24px;background:#1a2235;border:1px solid rgba(255,255,255,.15);color:#e8edf5;border-radius:8px;cursor:pointer;font-size:13px;margin-top:8px">↺ Reintentar</button></div>`;
     clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(()=>loadData(), 30000);
+    refreshTimer=setTimeout(()=>loadData(), 30000);
   }
 }
-
 loadData();
 </script>
 </body>
