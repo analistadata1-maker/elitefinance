@@ -91,7 +91,7 @@
 
 <script>
 const SB  = 'https://kpqwwfianohqkdhshvnt.supabase.co';
-const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwcXd3Zmlhbm9ocWtkaHNodm50Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDg4MzczOCwiZXhwIjoyMDkwNDU5NzM4fQ.mKVLx_Dzanmk_Yj8_V2q91WKAWKMhWPsjVCXKapCZhI';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwcXd3Zmlhbm9ocWtkaHNodm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODM3MzgsImV4cCI6MjA5MDQ1OTczOH0.QZFzNIwSJBKXaEEZxpXHSW2z3OhUmRTRLQ8z1VC7_Sk'; // anon key — solo lectura
 const H   = {'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Accept':'application/json'};
 const REFRESH_MS = 5 * 60 * 1000;
 let refreshTimer=null, countdownTimer=null, nextRefresh=null, charts=[];
@@ -342,7 +342,7 @@ async function loadData(manual=false){
     startCountdown();
   } catch(e){
     document.getElementById('sdot').className='sdot error';
-    document.getElementById('main').innerHTML=`<div class="state-screen"><div style="font-size:36px">⚠️</div><strong style="color:#ff4d6d;font-size:16px">Error al cargar los datos</strong><div class="ebox"><strong>Causa:</strong> ${e.message}</div><button onclick="loadData(true)" style="padding:10px 24px;background:#1a2235;border:1px solid rgba(255,255,255,.15);color:#e8edf5;border-radius:8px;cursor:pointer;font-size:13px;margin-top:8px">↺ Reintentar</button></div>`;
+    document.getElementById('main').innerHTML=`<div class="state-screen"><div style="font-size:36px">⚠️</div><strong style="color:#ff4d6d;font-size:16px">Error al cargar los datos</strong><div class="ebox"><strong>Causa:</strong> ${e.message}<br><br><strong>URL intentada:</strong> ${SB}/rest/v1/indicadores_gestion<br><br>Si ves "403" ejecuta el SQL de RLS en Supabase.<br>Si ves "Failed to fetch" hay un problema de CORS.</div><button onclick="loadData(true)" style="padding:10px 24px;background:#1a2235;border:1px solid rgba(255,255,255,.15);color:#e8edf5;border-radius:8px;cursor:pointer;font-size:13px;margin-top:8px">↺ Reintentar</button></div>`;
     clearTimeout(refreshTimer);
     refreshTimer=setTimeout(()=>loadData(), 30000);
   }
