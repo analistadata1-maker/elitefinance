@@ -92,278 +92,363 @@
 <script>
 const SB  = 'https://kpqwwfianohqkdhshvnt.supabase.co';
 const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwcXd3Zmlhbm9ocWtkaHNodm50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODM3MzgsImV4cCI6MjA5MDQ1OTczOH0.LY1Etuqd4oQIOtdU-tzzh88tLsydh9Up8GCsODMa-vg';
-const H   = {'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Accept':'application/json'};
+const H   = {'apikey':KEY,'Authorization':'Bearer '+KEY,'Accept':'application/json'};
 const REFRESH_MS = 5 * 60 * 1000;
 let refreshTimer=null, countdownTimer=null, nextRefresh=null, charts=[];
 
 async function fetchLastRow() {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+  var controller = new AbortController();
+  var timeout = setTimeout(function(){ controller.abort(); }, 10000);
   try {
-    const url = `${SB}/rest/v1/indicadores_gestion?order=created_at.desc&limit=1`;
-    console.log('Fetching:', url);
-    const r = await fetch(url, {headers: H, signal: controller.signal});
+    var url = SB+'/rest/v1/indicadores_gestion?order=created_at.desc&limit=1';
+    var r = await fetch(url, {headers: H, signal: controller.signal});
     clearTimeout(timeout);
-    console.log('Response status:', r.status);
     if (!r.ok) {
-      const body = await r.text();
-      throw new Error(`HTTP ${r.status}: ${body.slice(0,100)}`);
+      var body = await r.text();
+      throw new Error('HTTP '+r.status+': '+body.slice(0,100));
     }
-    const data = await r.json();
-    console.log('Data received:', data.length, 'rows');
+    var data = await r.json();
     if (!data.length) throw new Error('Sin registros en indicadores_gestion');
     return data[0];
   } catch(e) {
     clearTimeout(timeout);
-    if (e.name === 'AbortError') throw new Error('Timeout: Supabase no respondió en 10s');
+    if (e.name === 'AbortError') throw new Error('Timeout: Supabase no respondio en 10s');
     throw e;
   }
 }
 
-function n(v) { return (v === null || v === undefined) ? 0 : Number(v); }
-function fmt(v,d=0){ return new Intl.NumberFormat('es-CO',{maximumFractionDigits:d,minimumFractionDigits:d}).format(v); }
+function n(v){ return (v===null||v===undefined) ? 0 : Number(v); }
+function fmt(v,d){
+  d = d || 0;
+  return new Intl.NumberFormat('es-CO',{maximumFractionDigits:d,minimumFractionDigits:d}).format(v);
+}
 function fmtM(v){
-  const s=v<0?'-':''; const a=Math.abs(v);
+  var s = v<0 ? '-' : '';
+  var a = Math.abs(v);
   if(a>=1e9) return s+'$'+fmt(a/1e9,2)+'B';
   if(a>=1e6) return s+'$'+fmt(a/1e6,1)+'M';
   if(a>=1e3) return s+'$'+fmt(a/1e3,0)+'K';
   return s+'$'+fmt(a,0);
 }
-function pw(v,mx){return Math.min(Math.max(Math.abs(v)/mx*100,2),100).toFixed(1)+'%';}
-function destroyCharts(){charts.forEach(c=>{try{c.destroy()}catch(e){}});charts=[];}
+function pw(v,mx){ return Math.min(Math.max(Math.abs(v)/mx*100,2),100).toFixed(1)+'%'; }
+function destroyCharts(){ charts.forEach(function(c){try{c.destroy();}catch(e){}}); charts=[]; }
 
 function render(d) {
   destroyCharts();
 
-  // RAW VALUES — directo de Supabase (ya son numbers limpios)
-  const cartera     = n(d.cartera_por_cobrar);
-  const dispCaja    = n(d.disponible_caja);
-  const ingCaja     = n(d.ingresos_caja);
-  const pagCaja     = n(d.pagos_caja);
-  const dispBancos  = n(d.disponible_bancos);
-  const ingBancos   = n(d.ingresos_bancos);
-  const pagBancos   = n(d.pagos_bancos);
-  const invMP       = n(d.inventario_productos_marca_propia_pesos);
-  const invCom      = n(d.inventario_productos_comercializados_pesos);
-  const invSouv     = n(d.inventario_souvenir_suministros_pesos);
-  const cxpBienes   = n(d.cxp_proveedores_bienes);
-  const cxpServ     = n(d.cxp_proveedores_servicios);
-  const impPagar    = n(d.impuestos_por_pagar);
-  const honorarios  = n(d.honorarios_por_pagar);
-  const obligFin    = n(d.obligaciones_financieras);
-  const provisiones = n(d.provisiones);
-  const impRenta    = n(d.impuestos_renta_por_pagar);
-  const sobreGiro   = n(d.sobregiro_tarjetas_credito);
-  const obligLab    = n(d.obligaciones_laborales_por_pagar);
-  const compraProd  = n(d.compra_productos);
-  const compraIns   = n(d.compra_insumos);
-  const gtoComercial= n(d.gasto_comercializacion);
-  const gtoMkt      = n(d.gastos_marketing_mercadeo);
-  const gtoLogistica= n(d.gastos_logistica);
-  const gtoAdmin    = n(d.gastos_administrativos);
-  const gtoFin      = n(d.gastos_financieros);
-  const gtoImp      = n(d.gastos_impuestos);
-  const fidMay      = n(d.fidelizacion_mayoristas);
-  const vtasMay     = n(d.ventas_mayoristas_nuevos);
-  const tat         = n(d.tat);
-  const ecommerce   = n(d.ecommerce);
-  const chatcenter  = n(d.chatcenter);
-  const plataformas = n(d.plataformas);
-  const dropship    = n(d.dropshipping);
-  const redesSoc    = n(d.redes_sociales);
-  const marcaPerso  = n(d.marca_personal);
-  const intlUSA     = n(d.internacional_usa);
-  const otrosPaises = n(d.otros_paises);
-  const fidMin      = n(d.fidelizacion_minoristas);
-  const camilaIA    = n(d.camila_ia);
+  var cartera     = n(d.cartera_por_cobrar);
+  var dispCaja    = n(d.disponible_caja);
+  var ingCaja     = n(d.ingresos_caja);
+  var pagCaja     = n(d.pagos_caja);
+  var dispBancos  = n(d.disponible_bancos);
+  var ingBancos   = n(d.ingresos_bancos);
+  var pagBancos   = n(d.pagos_bancos);
+  var invMP       = n(d.inventario_productos_marca_propia_pesos);
+  var invCom      = n(d.inventario_productos_comercializados_pesos);
+  var invSouv     = n(d.inventario_souvenir_suministros_pesos);
+  var cxpBienes   = n(d.cxp_proveedores_bienes);
+  var cxpServ     = n(d.cxp_proveedores_servicios);
+  var impPagar    = n(d.impuestos_por_pagar);
+  var honorarios  = n(d.honorarios_por_pagar);
+  var obligFin    = n(d.obligaciones_financieras);
+  var provisiones = n(d.provisiones);
+  var impRenta    = n(d.impuestos_renta_por_pagar);
+  var sobreGiro   = n(d.sobregiro_tarjetas_credito);
+  var obligLab    = n(d.obligaciones_laborales_por_pagar);
+  var compraProd  = n(d.compra_productos);
+  var compraIns   = n(d.compra_insumos);
+  var gtoComercial= n(d.gasto_comercializacion);
+  var gtoMkt      = n(d.gastos_marketing_mercadeo);
+  var gtoLogistica= n(d.gastos_logistica);
+  var gtoAdmin    = n(d.gastos_administrativos);
+  var gtoFin      = n(d.gastos_financieros);
+  var gtoImp      = n(d.gastos_impuestos);
+  var fidMay      = n(d.fidelizacion_mayoristas);
+  var vtasMay     = n(d.ventas_mayoristas_nuevos);
+  var tat         = n(d.tat);
+  var ecommerce   = n(d.ecommerce);
+  var chatcenter  = n(d.chatcenter);
+  var plataformas = n(d.plataformas);
+  var dropship    = n(d.dropshipping);
+  var redesSoc    = n(d.redes_sociales);
+  var marcaPerso  = n(d.marca_personal);
+  var intlUSA     = n(d.internacional_usa);
+  var otrosPaises = n(d.otros_paises);
+  var fidMin      = n(d.fidelizacion_minoristas);
+  var camilaIA    = n(d.camila_ia);
 
-  // CALCULATED KPIs
-  const inventario  = invMP + invCom + invSouv;
-  const activoCte   = cartera + dispCaja + dispBancos + inventario;
-  const pasivoCte   = cxpBienes + cxpServ + impPagar + honorarios + obligFin + provisiones + impRenta + sobreGiro + obligLab;
-  const ingresosTot = fidMay + vtasMay + tat + ecommerce + chatcenter + plataformas + dropship + redesSoc + marcaPerso + intlUSA + otrosPaises + fidMin + camilaIA;
-  const comprasTot  = compraProd + compraIns;
-  const cxpTot      = cxpBienes + cxpServ;
+  var inventario  = invMP + invCom + invSouv;
+  var activoCte   = cartera + dispCaja + dispBancos + inventario;
+  var pasivoCte   = cxpBienes + cxpServ + impPagar + honorarios + obligFin + provisiones + impRenta + sobreGiro + obligLab;
+  var ingresosTot = fidMay + vtasMay + tat + ecommerce + chatcenter + plataformas + dropship + redesSoc + marcaPerso + intlUSA + otrosPaises + fidMin + camilaIA;
+  var comprasTot  = compraProd + compraIns;
+  var cxpTot      = cxpBienes + cxpServ;
 
-  const razonCte  = pasivoCte>0 ? activoCte/pasivoCte : 0;
-  const pruebaAc  = pasivoCte>0 ? (activoCte-inventario)/pasivoCte : 0;
-  const rotInvV   = inventario>0 ? comprasTot/inventario : 0;
-  const rotInvD   = rotInvV>0 ? 365/rotInvV : 0;
-  const rotCartV  = cartera>0 ? ingresosTot/cartera : 0;
-  const rotCartD  = rotCartV>0 ? 365/rotCartV : 0;
-  const rotProvV  = cxpTot>0 ? comprasTot/cxpTot : 0;
-  const rotProvD  = rotProvV>0 ? 365/rotProvV : 0;
-  const endeud    = activoCte>0 ? (pasivoCte/activoCte)*100 : 0;
-  const ctn       = activoCte - pasivoCte;
-  const pctCTN    = activoCte>0 ? (ctn/activoCte)*100 : 0;
+  var razonCte  = pasivoCte>0 ? activoCte/pasivoCte : 0;
+  var pruebaAc  = pasivoCte>0 ? (activoCte-inventario)/pasivoCte : 0;
+  var rotInvV   = inventario>0 ? comprasTot/inventario : 0;
+  var rotInvD   = rotInvV>0 ? 365/rotInvV : 0;
+  var rotCartV  = cartera>0 ? ingresosTot/cartera : 0;
+  var rotCartD  = rotCartV>0 ? 365/rotCartV : 0;
+  var rotProvV  = cxpTot>0 ? comprasTot/cxpTot : 0;
+  var rotProvD  = rotProvV>0 ? 365/rotProvV : 0;
+  var endeud    = activoCte>0 ? (pasivoCte/activoCte)*100 : 0;
+  var ctn       = activoCte - pasivoCte;
+  var pctCTN    = activoCte>0 ? (ctn/activoCte)*100 : 0;
 
-  function cls(v,g,ok)    {return v>=g?'grn':v>=ok?'amb':'red';}
-  function clsI(v,g,ok)   {return v<=g?'grn':v<=ok?'amb':'red';}
-  function bdg(v,g,ok,lb) {return v>=g?['g',lb[0]]:v>=ok?['a',lb[1]]:['r',lb[2]];}
-  function bdgI(v,g,ok,lb){return v<=g?['g',lb[0]]:v<=ok?['a',lb[1]]:['r',lb[2]];}
+  function cls(v,g,ok)    { return v>=g?'grn':v>=ok?'amb':'red'; }
+  function clsI(v,g,ok)   { return v<=g?'grn':v<=ok?'amb':'red'; }
+  function bdg(v,g,ok,lb) { return v>=g?['g',lb[0]]:v>=ok?['a',lb[1]]:['r',lb[2]]; }
+  function bdgI(v,g,ok,lb){ return v<=g?['g',lb[0]]:v<=ok?['a',lb[1]]:['r',lb[2]]; }
 
-  const rc_c=cls(razonCte,1.5,1.0);  const rc_b=bdg(razonCte,1.5,1.0,['Óptimo','Aceptable','Crítico']);
-  const pa_c=cls(pruebaAc,1.0,0.7);  const pa_b=bdg(pruebaAc,1.0,0.7,['Óptimo','Aceptable','Crítico']);
-  const ri_c=clsI(rotInvD,90,180);   const ri_b=bdgI(rotInvD,90,180,['Rápido','Moderado','Lento']);
-  const rca_c=clsI(rotCartD,30,60);  const rca_b=bdgI(rotCartD,30,60,['Ágil','Normal','Lento']);
-  const en_c=clsI(endeud,60,100);    const en_b=bdgI(endeud,60,100,['Bajo','Moderado','Alto']);
-  const ctn_c=ctn>=0?'grn':'red';    const ctn_b=ctn>=0?['g','Positivo']:['r','Negativo'];
-  const rp_c=clsI(rotProvD,60,120);  const rp_b=bdgI(rotProvD,60,120,['Óptimo','Normal','Alto']);
+  var rc_c  = cls(razonCte,1.5,1.0);  var rc_b  = bdg(razonCte,1.5,1.0,['Optimo','Aceptable','Critico']);
+  var pa_c  = cls(pruebaAc,1.0,0.7);  var pa_b  = bdg(pruebaAc,1.0,0.7,['Optimo','Aceptable','Critico']);
+  var ri_c  = clsI(rotInvD,90,180);   var ri_b  = bdgI(rotInvD,90,180,['Rapido','Moderado','Lento']);
+  var rca_c = clsI(rotCartD,30,60);   var rca_b = bdgI(rotCartD,30,60,['Agil','Normal','Lento']);
+  var en_c  = clsI(endeud,60,100);    var en_b  = bdgI(endeud,60,100,['Bajo','Moderado','Alto']);
+  var ctn_c = ctn>=0?'grn':'red';     var ctn_b = ctn>=0?['g','Positivo']:['r','Negativo'];
+  var rp_c  = clsI(rotProvD,60,120);  var rp_b  = bdgI(rotProvD,60,120,['Optimo','Normal','Alto']);
 
-  const canales=[
-    {l:'Mayoristas nuevos',v:vtasMay,   c:'#3b82f6'},
-    {l:'Fidel. Mayoristas', v:fidMay,   c:'#00c896'},
-    {l:'Ecommerce',         v:ecommerce,c:'#8b5cf6'},
-    {l:'Chatcenter',        v:chatcenter,c:'#f59e0b'},
-    {l:'TAT',               v:tat,      c:'#14b8a6'},
-    {l:'Fidel. Minoristas', v:fidMin,   c:'#f97316'},
+  var canalesRaw = [
+    {l:'Mayoristas nuevos', v:vtasMay,    c:'#3b82f6'},
+    {l:'Fidel. Mayoristas', v:fidMay,     c:'#00c896'},
+    {l:'Ecommerce',         v:ecommerce,  c:'#8b5cf6'},
+    {l:'Chatcenter',        v:chatcenter, c:'#f59e0b'},
+    {l:'TAT',               v:tat,        c:'#14b8a6'},
+    {l:'Fidel. Minoristas', v:fidMin,     c:'#f97316'},
     {l:'Plataformas',       v:plataformas,c:'#ec4899'},
-    {l:'Dropshipping',      v:dropship, c:'#a78bfa'},
-    {l:'Redes Sociales',    v:redesSoc, c:'#34d399'},
-    {l:'Internacional USA', v:intlUSA,  c:'#60a5fa'},
-    {l:'Otros países',      v:otrosPaises,c:'#9ca3af'},
-    {l:'Marca personal',    v:marcaPerso,c:'#fbbf24'},
-    {l:'Camila IA',         v:camilaIA, c:'#2dd4bf'},
-  ].filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+    {l:'Dropshipping',      v:dropship,   c:'#a78bfa'},
+    {l:'Redes Sociales',    v:redesSoc,   c:'#34d399'},
+    {l:'Internacional USA', v:intlUSA,    c:'#60a5fa'},
+    {l:'Otros paises',      v:otrosPaises,c:'#9ca3af'},
+    {l:'Marca personal',    v:marcaPerso, c:'#fbbf24'},
+    {l:'Camila IA',         v:camilaIA,   c:'#2dd4bf'}
+  ];
+  var canales = canalesRaw.filter(function(x){ return x.v>0; }).sort(function(a,b){ return b.v-a.v; });
 
-  function mc(cl,lb,vl,sb,ac){return `<div class="mc ${cl}"><div class="lb">${lb}</div><div class="vl">${vl}</div>${sb?`<div class="sb">${sb}</div>`:''}<div class="al" style="background:${ac||'transparent'}"></div></div>`;}
-  function kcard(cl,kn,kv,km,bw,ba){return `<div class="kpi ${cl}"><div class="tr"><div class="kn">${kn}</div><span class="badge ${ba[0]}">${ba[1]}</span></div><div class="kv">${kv}</div><div class="km">${km}</div><div class="bar"><div class="fill" style="width:${bw}"></div></div></div>`;}
+  function mc(cl,lb,vl,sb,ac){
+    return '<div class="mc '+cl+'"><div class="lb">'+lb+'</div><div class="vl">'+vl+'</div>'+(sb?'<div class="sb">'+sb+'</div>':'')+'<div class="al" style="background:'+(ac||'transparent')+'"></div></div>';
+  }
+  function kcard(cl,kn,kv,km,bw,ba){
+    return '<div class="kpi '+cl+'"><div class="tr"><div class="kn">'+kn+'</div><span class="badge '+ba[0]+'">'+ba[1]+'</span></div><div class="kv">'+kv+'</div><div class="km">'+km+'</div><div class="bar"><div class="fill" style="width:'+bw+'"></div></div></div>';
+  }
 
-  document.getElementById('main').innerHTML=`
-  <div class="sec">Activos corrientes</div>
-  <div class="g5">
-    ${mc('blue','Activo corriente total',fmtM(activoCte),'Cartera + Caja + Bancos + Inventario','#3b82f6')}
-    ${mc('','Cartera por cobrar',fmtM(cartera),`Rot. ${fmt(rotCartD,1)} días`,'#8b5cf6')}
-    ${mc('pos','Disponible en caja',fmtM(dispCaja),`Ingresos caja: ${fmtM(ingCaja)}`,'#00c896')}
-    ${mc('pos','Disponible en bancos',fmtM(dispBancos),`Ingresos bancos: ${fmtM(ingBancos)}`,'#00c896')}
-    ${mc('warn','Inventario total',fmtM(inventario),`MP ${fmtM(invMP)} | Com. ${fmtM(invCom)}`,'#f59e0b')}
-  </div>
-  <div class="sec">Pasivos corrientes</div>
-  <div class="g5">
-    ${mc('neg','Pasivo corriente total',fmtM(pasivoCte),`Endeudamiento: ${fmt(endeud,1)}%`,'#ff4d6d')}
-    ${mc('neg','Obligaciones financieras',fmtM(obligFin),'',' #ff4d6d')}
-    ${mc('warn','CXP proveedores bienes',fmtM(cxpBienes),`Servicios: ${fmtM(cxpServ)}`,'#f59e0b')}
-    ${mc('warn','Impuestos por pagar',fmtM(impPagar),`Renta: ${fmtM(impRenta)}`,'#f59e0b')}
-    ${mc('warn','Honorarios + Provisiones',fmtM(honorarios+provisiones),`Oblig. lab: ${fmtM(obligLab)}`,'#f59e0b')}
-  </div>
-  <div class="sec">Ingresos y egresos del período</div>
-  <div class="g4">
-    ${mc('pos','Ingresos totales (canales)',fmtM(ingresosTot),`${canales.length} canales activos`,'#00c896')}
-    ${mc('pos','Ingresos bancos (período)',fmtM(ingBancos),`Pagos bancos: ${fmtM(pagBancos)}`,'#00c896')}
-    ${mc('neg','Pagos caja + bancos',fmtM(pagCaja+pagBancos),`Caja ${fmtM(pagCaja)} | Bancos ${fmtM(pagBancos)}`,'#ff4d6d')}
-    ${mc('warn','Compras totales',fmtM(comprasTot),`Prod. ${fmtM(compraProd)} | Ins. ${fmtM(compraIns)}`,'#f59e0b')}
-  </div>
-  <div class="sec">Gastos operativos</div>
-  <div class="g5">
-    ${mc('warn','Administrativos',fmtM(gtoAdmin),'',' #f97316')}
-    ${mc('warn','Marketing',fmtM(gtoMkt),'',' #f97316')}
-    ${mc('warn','Logística',fmtM(gtoLogistica),'',' #f97316')}
-    ${mc('warn','Financieros',fmtM(gtoFin),'',' #f97316')}
-    ${mc('warn','Comercialización',fmtM(gtoComercial),'',' #f97316')}
-  </div>
-  <div class="divider"></div>
-  <div class="sec">KPI Financieros — calculados en tiempo real</div>
-  <div class="g3">
-    ${kcard(rc_c,'Razón corriente',fmt(razonCte,2),`Activo ${fmtM(activoCte)} ÷ Pasivo ${fmtM(pasivoCte)} | Meta ≥ 1,5`,pw(razonCte,3),rc_b)}
-    ${kcard(pa_c,'Prueba ácida',fmt(pruebaAc,2),`(Activo − Inventario) ÷ Pasivo | Meta ≥ 1,0`,pw(pruebaAc,2),pa_b)}
-    ${kcard(ctn_c,'Capital trabajo neto',fmtM(ctn),`% CTN: ${fmt(pctCTN,1)}% | Activo − Pasivo corriente`,pw(Math.abs(pctCTN),100),ctn_b)}
-    ${kcard(ri_c,'Rot. inventario',`${fmt(rotInvD,0)} días`,`${fmt(rotInvV,2)} veces | Compras ${fmtM(comprasTot)} ÷ Inv. ${fmtM(inventario)} × 365`,Math.min(rotInvD/365*100,100).toFixed(1)+'%',ri_b)}
-    ${kcard(rca_c,'Rot. cartera',`${fmt(rotCartD,1)} días`,`${fmt(rotCartV,2)} veces | Ingresos ${fmtM(ingresosTot)} ÷ Cartera ${fmtM(cartera)} × 365`,Math.min(rotCartD/90*100,100).toFixed(1)+'%',rca_b)}
-    ${kcard(en_c,'Endeudamiento cte.',`${fmt(endeud,1)}%`,`Pasivo ${fmtM(pasivoCte)} ÷ Activo ${fmtM(activoCte)} × 100 | Meta ≤ 60%`,Math.min(endeud,100).toFixed(1)+'%',en_b)}
-    ${kcard(rp_c,'Rot. proveedores',`${fmt(rotProvD,0)} días`,`${fmt(rotProvV,2)} veces | Compras ${fmtM(comprasTot)} ÷ CXP ${fmtM(cxpTot)} × 365`,Math.min(rotProvD/365*100,100).toFixed(1)+'%',rp_b)}
-  </div>
-  <div class="sec">Análisis visual</div>
-  <div class="cc" style="margin-bottom:10px">
-    <div class="ct">Ingresos por canal de venta — período actual</div>
-    <div class="leg">${canales.map(c=>`<span><b style="background:${c.c}"></b>${c.l} <strong style="color:#e8edf5">${fmtM(c.v)}</strong></span>`).join('')}</div>
-    <div style="position:relative;width:100%;height:${Math.max(canales.length*38+50,180)}px"><canvas id="ch1"></canvas></div>
-  </div>
-  <div class="g2" style="margin-bottom:10px">
-    <div class="cc"><div class="ct">Composición activo corriente</div><div style="position:relative;width:100%;height:220px"><canvas id="ch2"></canvas></div></div>
-    <div class="cc"><div class="ct">Activo vs Pasivo vs CTN</div><div style="position:relative;width:100%;height:220px"><canvas id="ch3"></canvas></div></div>
-  </div>
-  <div class="g2">
-    <div class="cc"><div class="ct">Gastos operativos</div><div style="position:relative;width:100%;height:220px"><canvas id="ch4"></canvas></div></div>
-    <div class="cc"><div class="ct">Semáforo de liquidez</div><div id="sem" style="padding-top:4px"></div></div>
-  </div>`;
+  var html = '';
+  html += '<div class="sec">Activos corrientes</div>';
+  html += '<div class="g5">';
+  html += mc('blue','Activo corriente total',fmtM(activoCte),'Cartera + Caja + Bancos + Inventario','#3b82f6');
+  html += mc('','Cartera por cobrar',fmtM(cartera),'Rot. '+fmt(rotCartD,1)+' dias','#8b5cf6');
+  html += mc('pos','Disponible en caja',fmtM(dispCaja),'Ingresos caja: '+fmtM(ingCaja),'#00c896');
+  html += mc('pos','Disponible en bancos',fmtM(dispBancos),'Ingresos bancos: '+fmtM(ingBancos),'#00c896');
+  html += mc('warn','Inventario total',fmtM(inventario),'MP '+fmtM(invMP)+' | Com. '+fmtM(invCom),'#f59e0b');
+  html += '</div>';
 
-  const colMap={grn:'#00c896',amb:'#f59e0b',red:'#ff4d6d'};
-  document.getElementById('sem').innerHTML=[
-    {l:'Razón corriente',v:fmt(razonCte,2),c:rc_c,m:'≥ 1,5'},
-    {l:'Prueba ácida',v:fmt(pruebaAc,2),c:pa_c,m:'≥ 1,0'},
-    {l:'Endeudamiento',v:fmt(endeud,1)+'%',c:en_c,m:'≤ 60%'},
-    {l:'Rot. inventario',v:fmt(rotInvD,0)+' días',c:ri_c,m:'≤ 90d'},
-    {l:'Rot. cartera',v:fmt(rotCartD,1)+' días',c:rca_c,m:'≤ 30d'},
-    {l:'Rot. proveedores',v:fmt(rotProvD,0)+' días',c:rp_c,m:'≤ 60d'},
-    {l:'CTN',v:fmtM(ctn),c:ctn_c,m:'> 0'},
-  ].map(s=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-    <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${colMap[s.c]};box-shadow:0 0 5px ${colMap[s.c]};flex-shrink:0"></span><span style="font-size:11px;color:#8a9bbf">${s.l}</span></div>
-    <div><span style="font-size:13px;font-weight:600;color:${colMap[s.c]}">${s.v}</span><span style="font-size:10px;color:#4a5a7a;margin-left:6px">${s.m}</span></div></div>`).join('');
+  html += '<div class="sec">Pasivos corrientes</div>';
+  html += '<div class="g5">';
+  html += mc('neg','Pasivo corriente total',fmtM(pasivoCte),'Endeudamiento: '+fmt(endeud,1)+'%','#ff4d6d');
+  html += mc('neg','Obligaciones financieras',fmtM(obligFin),'','#ff4d6d');
+  html += mc('warn','CXP proveedores bienes',fmtM(cxpBienes),'Servicios: '+fmtM(cxpServ),'#f59e0b');
+  html += mc('warn','Impuestos por pagar',fmtM(impPagar),'Renta: '+fmtM(impRenta),'#f59e0b');
+  html += mc('warn','Honorarios + Provisiones',fmtM(honorarios+provisiones),'Oblig. lab: '+fmtM(obligLab),'#f59e0b');
+  html += '</div>';
 
-  const GC='rgba(255,255,255,0.04)',TC='#4a5a7a';
-  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
+  html += '<div class="sec">Ingresos y egresos del periodo</div>';
+  html += '<div class="g4">';
+  html += mc('pos','Ingresos totales (canales)',fmtM(ingresosTot),canales.length+' canales activos','#00c896');
+  html += mc('pos','Ingresos bancos (periodo)',fmtM(ingBancos),'Pagos bancos: '+fmtM(pagBancos),'#00c896');
+  html += mc('neg','Pagos caja + bancos',fmtM(pagCaja+pagBancos),'Caja '+fmtM(pagCaja)+' | Bancos '+fmtM(pagBancos),'#ff4d6d');
+  html += mc('warn','Compras totales',fmtM(comprasTot),'Prod. '+fmtM(compraProd)+' | Ins. '+fmtM(compraIns),'#f59e0b');
+  html += '</div>';
 
-  // Charts con manejo robusto de datos vacíos
+  html += '<div class="sec">Gastos operativos</div>';
+  html += '<div class="g5">';
+  html += mc('warn','Administrativos',fmtM(gtoAdmin),'','#f97316');
+  html += mc('warn','Marketing',fmtM(gtoMkt),'','#f97316');
+  html += mc('warn','Logistica',fmtM(gtoLogistica),'','#f97316');
+  html += mc('warn','Financieros',fmtM(gtoFin),'','#f97316');
+  html += mc('warn','Comercializacion',fmtM(gtoComercial),'','#f97316');
+  html += '</div>';
+
+  html += '<div class="divider"></div>';
+  html += '<div class="sec">KPI Financieros</div>';
+  html += '<div class="g3">';
+  html += kcard(rc_c,'Razon corriente',fmt(razonCte,2),'Activo '+fmtM(activoCte)+' / Pasivo '+fmtM(pasivoCte)+' | Meta >= 1.5',pw(razonCte,3),rc_b);
+  html += kcard(pa_c,'Prueba acida',fmt(pruebaAc,2),'(Activo - Inventario) / Pasivo | Meta >= 1.0',pw(pruebaAc,2),pa_b);
+  html += kcard(ctn_c,'Capital trabajo neto',fmtM(ctn),'% CTN: '+fmt(pctCTN,1)+'% | Activo - Pasivo corriente',pw(Math.abs(pctCTN),100),ctn_b);
+  html += kcard(ri_c,'Rot. inventario',fmt(rotInvD,0)+' dias',fmt(rotInvV,2)+' veces | Compras '+fmtM(comprasTot)+' / Inv. '+fmtM(inventario)+' x 365',Math.min(rotInvD/365*100,100).toFixed(1)+'%',ri_b);
+  html += kcard(rca_c,'Rot. cartera',fmt(rotCartD,1)+' dias',fmt(rotCartV,2)+' veces | Ingresos '+fmtM(ingresosTot)+' / Cartera '+fmtM(cartera)+' x 365',Math.min(rotCartD/90*100,100).toFixed(1)+'%',rca_b);
+  html += kcard(en_c,'Endeudamiento cte.',fmt(endeud,1)+'%','Pasivo '+fmtM(pasivoCte)+' / Activo '+fmtM(activoCte)+' x 100 | Meta <= 60%',Math.min(endeud,100).toFixed(1)+'%',en_b);
+  html += kcard(rp_c,'Rot. proveedores',fmt(rotProvD,0)+' dias',fmt(rotProvV,2)+' veces | Compras '+fmtM(comprasTot)+' / CXP '+fmtM(cxpTot)+' x 365',Math.min(rotProvD/365*100,100).toFixed(1)+'%',rp_b);
+  html += '</div>';
+
+  var legHTML = '';
+  canales.forEach(function(c){ legHTML += '<span><b style="background:'+c.c+'"></b>'+c.l+' <strong style="color:#e8edf5">'+fmtM(c.v)+'</strong></span>'; });
+  var chartH = Math.max(canales.length*38+50, 180);
+
+  html += '<div class="sec">Analisis visual</div>';
+  html += '<div class="cc" style="margin-bottom:10px"><div class="ct">Ingresos por canal de venta</div><div class="leg">'+legHTML+'</div><div style="position:relative;width:100%;height:'+chartH+'px"><canvas id="ch1"></canvas></div></div>';
+  html += '<div class="g2" style="margin-bottom:10px">';
+  html += '<div class="cc"><div class="ct">Composicion activo corriente</div><div style="position:relative;width:100%;height:220px"><canvas id="ch2"></canvas></div></div>';
+  html += '<div class="cc"><div class="ct">Activo vs Pasivo vs CTN</div><div style="position:relative;width:100%;height:220px"><canvas id="ch3"></canvas></div></div>';
+  html += '</div>';
+  html += '<div class="g2">';
+  html += '<div class="cc"><div class="ct">Gastos operativos</div><div style="position:relative;width:100%;height:220px"><canvas id="ch4"></canvas></div></div>';
+  html += '<div class="cc"><div class="ct">Semaforo de liquidez</div><div id="sem" style="padding-top:4px"></div></div>';
+  html += '</div>';
+
+  document.getElementById('main').innerHTML = html;
+
+  // Semaforo
+  var colMap = {grn:'#00c896', amb:'#f59e0b', red:'#ff4d6d'};
+  var semItems = [
+    {l:'Razon corriente',   v:fmt(razonCte,2),     c:rc_c,  m:'meta >= 1.5'},
+    {l:'Prueba acida',      v:fmt(pruebaAc,2),     c:pa_c,  m:'meta >= 1.0'},
+    {l:'Endeudamiento',     v:fmt(endeud,1)+'%',   c:en_c,  m:'meta <= 60%'},
+    {l:'Rot. inventario',   v:fmt(rotInvD,0)+' d', c:ri_c,  m:'meta <= 90d'},
+    {l:'Rot. cartera',      v:fmt(rotCartD,1)+' d',c:rca_c, m:'meta <= 30d'},
+    {l:'Rot. proveedores',  v:fmt(rotProvD,0)+' d',c:rp_c,  m:'meta <= 60d'},
+    {l:'CTN',               v:fmtM(ctn),           c:ctn_c, m:'debe ser > 0'}
+  ];
+  var semHTML = '';
+  semItems.forEach(function(s){
+    semHTML += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">';
+    semHTML += '<div style="display:flex;align-items:center;gap:8px">';
+    semHTML += '<span style="width:8px;height:8px;border-radius:50%;background:'+colMap[s.c]+';box-shadow:0 0 5px '+colMap[s.c]+';flex-shrink:0"></span>';
+    semHTML += '<span style="font-size:11px;color:#8a9bbf">'+s.l+'</span></div>';
+    semHTML += '<div><span style="font-size:13px;font-weight:600;color:'+colMap[s.c]+'">'+s.v+'</span>';
+    semHTML += '<span style="font-size:10px;color:#4a5a7a;margin-left:6px">'+s.m+'</span></div></div>';
+  });
+  document.getElementById('sem').innerHTML = semHTML;
+
+  var GC = 'rgba(255,255,255,0.04)';
+  var TC = '#4a5a7a';
+
+  // Chart 1 - Canales
   try {
-    const canalesData = canales.length > 0 ? canales : [{l:'Sin datos',v:0,c:'#4a5a7a'}];
-    charts.push(new Chart(document.getElementById('ch1'),{type:'bar',
-      data:{labels:canalesData.map(c=>c.l),datasets:[{data:canalesData.map(c=>+(c.v/1e6).toFixed(2)),backgroundColor:canalesData.map(c=>c.c),borderRadius:4,borderSkipped:false}]},
-      options:{...base,indexAxis:'y',scales:{x:{ticks:{color:TC,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:GC},border:{display:false}},y:{ticks:{color:'#8a9bbf',font:{size:11}},grid:{display:false},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.x.toFixed(2)+'M'}}}}}));
-  } catch(e){ console.warn('ch1 error:',e); }
+    var c1data = canales.length > 0 ? canales : [{l:'Sin datos',v:0,c:'#4a5a7a'}];
+    charts.push(new Chart(document.getElementById('ch1'), {
+      type: 'bar',
+      data: {
+        labels: c1data.map(function(c){ return c.l; }),
+        datasets: [{
+          data: c1data.map(function(c){ return +(c.v/1e6).toFixed(2); }),
+          backgroundColor: c1data.map(function(c){ return c.c; }),
+          borderRadius: 4,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+        plugins: { legend: {display:false}, tooltip: { callbacks: { label: function(ctx){ return ' $'+ctx.parsed.x.toFixed(2)+'M'; } } } },
+        scales: {
+          x: { ticks: { color:TC, font:{size:10}, callback: function(v){ return '$'+v+'M'; } }, grid: {color:GC}, border: {display:false} },
+          y: { ticks: { color:'#8a9bbf', font:{size:11} }, grid: {display:false}, border: {display:false} }
+        }
+      }
+    }));
+  } catch(e){ console.warn('ch1:', e.message); }
 
+  // Chart 2 - Doughnut activo
   try {
-    charts.push(new Chart(document.getElementById('ch2'),{type:'doughnut',
-      data:{labels:['Cartera','Caja','Bancos','Inventario'],datasets:[{data:[cartera,dispCaja,dispBancos,inventario].map(v=>+(v/1e6).toFixed(2)),backgroundColor:['#8b5cf6','#00c896','#3b82f6','#f59e0b'],borderWidth:2,borderColor:'#111827'}]},
-      options:{...base,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8a9bbf',font:{size:10},boxWidth:10,padding:10}},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.toFixed(1)+'M'}}}}}));
-  } catch(e){ console.warn('ch2 error:',e); }
+    charts.push(new Chart(document.getElementById('ch2'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Cartera','Caja','Bancos','Inventario'],
+        datasets: [{ data: [cartera,dispCaja,dispBancos,inventario].map(function(v){ return +(v/1e6).toFixed(2); }), backgroundColor: ['#8b5cf6','#00c896','#3b82f6','#f59e0b'], borderWidth: 2, borderColor: '#111827' }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '65%',
+        plugins: { legend: { display:true, position:'bottom', labels: { color:'#8a9bbf', font:{size:10}, boxWidth:10, padding:10 } }, tooltip: { callbacks: { label: function(ctx){ return ' $'+ctx.parsed.toFixed(1)+'M'; } } } }
+      }
+    }));
+  } catch(e){ console.warn('ch2:', e.message); }
 
+  // Chart 3 - Activo vs Pasivo
   try {
-    charts.push(new Chart(document.getElementById('ch3'),{type:'bar',
-      data:{labels:['Activo cte.','Pasivo cte.','CTN'],datasets:[{data:[+(activoCte/1e6).toFixed(2),+(pasivoCte/1e6).toFixed(2),+(ctn/1e6).toFixed(2)],backgroundColor:['#3b82f6','#ff4d6d',ctn>=0?'#00c896':'#ff4d6d'],borderRadius:6,borderSkipped:false}]},
-      options:{...base,scales:{x:{ticks:{color:TC,font:{size:11}},grid:{display:false},border:{display:false}},y:{ticks:{color:TC,font:{size:10},callback:v=>'$'+v+'M'},grid:{color:GC},border:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return (v<0?'-':'')+'$'+Math.abs(v).toFixed(1)+'M'}}}}}));
-  } catch(e){ console.warn('ch3 error:',e); }
+    var ctnColor = ctn >= 0 ? '#00c896' : '#ff4d6d';
+    charts.push(new Chart(document.getElementById('ch3'), {
+      type: 'bar',
+      data: {
+        labels: ['Activo cte.','Pasivo cte.','CTN'],
+        datasets: [{ data: [+(activoCte/1e6).toFixed(2),+(pasivoCte/1e6).toFixed(2),+(ctn/1e6).toFixed(2)], backgroundColor: ['#3b82f6','#ff4d6d',ctnColor], borderRadius: 6, borderSkipped: false }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: {display:false}, tooltip: { callbacks: { label: function(ctx){ var v=ctx.parsed.y; return (v<0?'-':'')+'$'+Math.abs(v).toFixed(1)+'M'; } } } },
+        scales: {
+          x: { ticks: { color:TC, font:{size:11} }, grid: {display:false}, border: {display:false} },
+          y: { ticks: { color:TC, font:{size:10}, callback: function(v){ return '$'+v+'M'; } }, grid: {color:GC}, border: {display:false} }
+        }
+      }
+    }));
+  } catch(e){ console.warn('ch3:', e.message); }
 
+  // Chart 4 - Gastos
   try {
-    const gd=[{l:'Administrativos',v:gtoAdmin,c:'#3b82f6'},{l:'Marketing',v:gtoMkt,c:'#f59e0b'},{l:'Logística',v:gtoLogistica,c:'#14b8a6'},{l:'Financieros',v:gtoFin,c:'#ff4d6d'},{l:'Comercialización',v:gtoComercial,c:'#8b5cf6'},{l:'Impuestos',v:gtoImp,c:'#f97316'}].filter(x=>x.v>0);
-    const gdFinal = gd.length > 0 ? gd : [{l:'Sin datos',v:1,c:'#4a5a7a'}];
-    charts.push(new Chart(document.getElementById('ch4'),{type:'doughnut',
-      data:{labels:gdFinal.map(x=>x.l),datasets:[{data:gdFinal.map(x=>+(x.v/1e6).toFixed(2)),backgroundColor:gdFinal.map(x=>x.c),borderWidth:2,borderColor:'#111827'}]},
-      options:{...base,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#8a9bbf',font:{size:10},boxWidth:10,padding:8}},tooltip:{callbacks:{label:ctx=>' $'+ctx.parsed.toFixed(1)+'M'}}}}}));
-  } catch(e){ console.warn('ch4 error:',e); }
+    var gdRaw = [
+      {l:'Administrativos',v:gtoAdmin,   c:'#3b82f6'},
+      {l:'Marketing',      v:gtoMkt,     c:'#f59e0b'},
+      {l:'Logistica',      v:gtoLogistica,c:'#14b8a6'},
+      {l:'Financieros',    v:gtoFin,     c:'#ff4d6d'},
+      {l:'Comercializacion',v:gtoComercial,c:'#8b5cf6'},
+      {l:'Impuestos',      v:gtoImp,     c:'#f97316'}
+    ];
+    var gd = gdRaw.filter(function(x){ return x.v>0; });
+    var gdFinal = gd.length > 0 ? gd : [{l:'Sin datos',v:1,c:'#4a5a7a'}];
+    charts.push(new Chart(document.getElementById('ch4'), {
+      type: 'doughnut',
+      data: {
+        labels: gdFinal.map(function(x){ return x.l; }),
+        datasets: [{ data: gdFinal.map(function(x){ return +(x.v/1e6).toFixed(2); }), backgroundColor: gdFinal.map(function(x){ return x.c; }), borderWidth: 2, borderColor: '#111827' }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: { legend: { display:true, position:'bottom', labels: { color:'#8a9bbf', font:{size:10}, boxWidth:10, padding:8 } }, tooltip: { callbacks: { label: function(ctx){ return ' $'+ctx.parsed.toFixed(1)+'M'; } } } }
+      }
+    }));
+  } catch(e){ console.warn('ch4:', e.message); }
 }
 
 function startCountdown(){
-  clearInterval(countdownTimer); nextRefresh=Date.now()+REFRESH_MS;
-  countdownTimer=setInterval(()=>{
-    const rem=Math.max(0,nextRefresh-Date.now());
-    document.getElementById('cdown').style.width=(rem/REFRESH_MS*100).toFixed(1)+'%';
-    const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);
-    document.getElementById('ctxt').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+  clearInterval(countdownTimer);
+  nextRefresh = Date.now() + REFRESH_MS;
+  countdownTimer = setInterval(function(){
+    var rem = Math.max(0, nextRefresh - Date.now());
+    document.getElementById('cdown').style.width = (rem/REFRESH_MS*100).toFixed(1)+'%';
+    var m = Math.floor(rem/60000);
+    var s = Math.floor((rem%60000)/1000);
+    document.getElementById('ctxt').textContent = m+':'+(s<10?'0':'')+s;
     if(rem<=0) clearInterval(countdownTimer);
-  },500);
+  }, 500);
 }
 
-async function loadData(manual=false){
-  const dot=document.getElementById('sdot'); dot.className='sdot loading';
-  if(manual) document.getElementById('main').innerHTML='<div class="state-screen"><div class="spinner"></div><div>Actualizando datos...</div></div>';
-  try{
-    const row = await fetchLastRow();
-    const fi=row.fecha_inicio||'', ff=row.fecha_final||'', ts=row.updated_at||row.created_at||'';
-    document.getElementById('periodo').innerHTML=`<span class="pbadge">📅 ${fi} → ${ff}</span>&nbsp; Actualizado: ${new Date(ts).toLocaleString('es-CO')}`;
+async function loadData(manual){
+  var dot = document.getElementById('sdot');
+  dot.className = 'sdot loading';
+  if(manual){
+    document.getElementById('main').innerHTML = '<div class="state-screen"><div class="spinner"></div><div>Actualizando datos...</div></div>';
+  }
+  try {
+    var row = await fetchLastRow();
+    var fi = row.fecha_inicio || '';
+    var ff = row.fecha_final  || '';
+    var ts = row.updated_at   || row.created_at || '';
+    document.getElementById('periodo').innerHTML = '<span class="pbadge">Periodo: '+fi+' a '+ff+'</span> &nbsp; Actualizado: '+new Date(ts).toLocaleString('es-CO');
     render(row);
-    document.getElementById('sdot').className='sdot';
-    document.getElementById('footer').style.display='block';
+    document.getElementById('sdot').className = 'sdot';
+    document.getElementById('footer').style.display = 'block';
     clearTimeout(refreshTimer);
-    refreshTimer=setTimeout(()=>loadData(), REFRESH_MS);
+    refreshTimer = setTimeout(function(){ loadData(false); }, REFRESH_MS);
     startCountdown();
-  } catch(e){
-    document.getElementById('sdot').className='sdot error';
-    document.getElementById('main').innerHTML=`<div class="state-screen"><div style="font-size:36px">⚠️</div><strong style="color:#ff4d6d;font-size:16px">Error al cargar los datos</strong><div class="ebox"><strong>Causa:</strong> ${e.message}<br><br><strong>URL intentada:</strong> ${SB}/rest/v1/indicadores_gestion<br><br>Si ves "403" ejecuta el SQL de RLS en Supabase.<br>Si ves "Failed to fetch" hay un problema de CORS.</div><button onclick="loadData(true)" style="padding:10px 24px;background:#1a2235;border:1px solid rgba(255,255,255,.15);color:#e8edf5;border-radius:8px;cursor:pointer;font-size:13px;margin-top:8px">↺ Reintentar</button></div>`;
+  } catch(e) {
+    document.getElementById('sdot').className = 'sdot error';
+    document.getElementById('main').innerHTML = '<div class="state-screen"><div style="font-size:36px">Warning</div><strong style="color:#ff4d6d;font-size:16px">Error al cargar los datos</strong><div class="ebox"><strong>Causa:</strong> '+e.message+'</div><button onclick="loadData(true)" style="padding:10px 24px;background:#1a2235;border:1px solid rgba(255,255,255,.15);color:#e8edf5;border-radius:8px;cursor:pointer;font-size:13px;margin-top:8px">Reintentar</button></div>';
     clearTimeout(refreshTimer);
-    refreshTimer=setTimeout(()=>loadData(), 30000);
+    refreshTimer = setTimeout(function(){ loadData(false); }, 30000);
   }
 }
-loadData();
+
+loadData(false);
 </script>
 </body>
 </html>
