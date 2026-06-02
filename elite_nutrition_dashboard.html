@@ -97,11 +97,27 @@ const REFRESH_MS = 5 * 60 * 1000;
 let refreshTimer=null, countdownTimer=null, nextRefresh=null, charts=[];
 
 async function fetchLastRow() {
-  const r = await fetch(`${SB}/rest/v1/indicadores_gestion?order=created_at.desc&limit=1`, {headers: H});
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  const data = await r.json();
-  if (!data.length) throw new Error('Sin registros en indicadores_gestion');
-  return data[0];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+  try {
+    const url = `${SB}/rest/v1/indicadores_gestion?order=created_at.desc&limit=1`;
+    console.log('Fetching:', url);
+    const r = await fetch(url, {headers: H, signal: controller.signal});
+    clearTimeout(timeout);
+    console.log('Response status:', r.status);
+    if (!r.ok) {
+      const body = await r.text();
+      throw new Error(`HTTP ${r.status}: ${body.slice(0,100)}`);
+    }
+    const data = await r.json();
+    console.log('Data received:', data.length, 'rows');
+    if (!data.length) throw new Error('Sin registros en indicadores_gestion');
+    return data[0];
+  } catch(e) {
+    clearTimeout(timeout);
+    if (e.name === 'AbortError') throw new Error('Timeout: Supabase no respondió en 10s');
+    throw e;
+  }
 }
 
 function n(v) { return (v === null || v === undefined) ? 0 : Number(v); }
